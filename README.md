@@ -1,188 +1,59 @@
-# OpenMU Browser Stack
+# MUPinas — OpenMU Browser Stack
 
-MU Online in the browser. Server-side infrastructure to run MU Online via WebAssembly, using [OpenMU](https://github.com/MUnique/OpenMU) as the game server.
+A separate local OpenMU deployment with PostgreSQL, a WebSocket-to-TCP proxy and a static web server. Based on [beater-studios/openmu-browser-stack](https://github.com/beater-studios/openmu-browser-stack) at commit `870a70f37c8f3b8da3c255a903c9068b7fdb7260`; upstream history, application source and MIT license are retained. The original documentation is in [README.upstream.md](README.upstream.md).
 
-## What is this
+**This is working server infrastructure, not a playable browser game.** Upstream does not include a WASM client. The web page displays `No WASM client found`; game-account login, character selection, 3D rendering and multiplayer gameplay are not implemented by this repository.
 
-Everything you need on the server side to bridge a WASM MU client to OpenMU:
+## Requirements
 
-- **Game Server** — OpenMU (C#/.NET) running via Docker with PostgreSQL
-- **WebSocket-TCP Proxy** — Bridge between the browser (WebSocket only) and OpenMU (TCP)
-- **Web Server** — Serves the WASM client with required headers (COOP/COEP)
-- **HTML Template** — Ready to receive a compiled WASM client
+- Docker Desktop running on macOS, or Docker Engine on Linux.
+- Docker Compose **2.24.4+** (the local override uses `!override`).
+- Node.js **22+** and npm. `.nvmrc` selects Node 22; use `nvm install && nvm use` if you already use nvm.
+- Git, Bash and curl.
+- Free host ports: 8080, 8090, 7100, 44405 and 45901–45903.
 
-```mermaid
-flowchart LR
-    subgraph Browser
-        WASM[WASM Client]
-    end
+The container image digests are pinned. Their upstream images provide ARM64 and AMD64 variants. Validation was performed on Linux AMD64; Apple Silicon execution has not been tested here.
 
-    subgraph Node.js
-        WEB[Web Server\n:8080]
-        PROXY[WS-TCP Proxy\n:7100]
-    end
-
-    subgraph Docker
-        CS[Connect Server\n:44405]
-        GS[Game Server\n:55901]
-        PG[(PostgreSQL\n:5433)]
-    end
-
-    WASM -- HTTP --> WEB
-    WASM -- WebSocket --> PROXY
-    PROXY -- TCP --> CS
-    PROXY -- TCP --> GS
-    CS --- PG
-    GS --- PG
-```
-
-**Connection flow:**
-1. Client opens WebSocket to proxy → proxy connects TCP to Connect Server (:44405)
-2. Connect Server sends ConnectionInfo (`C1 F4 03`) with Game Server IP:port
-3. Proxy rewrites the IP:port to its own address, stores the real target
-4. Client reconnects via WebSocket → proxy routes TCP to Game Server (:55901)
-
-## Status
-
-| Component | Status |
-|-----------|--------|
-| WebSocket-TCP Proxy | Implemented, not tested end-to-end |
-| Web Server (static + COOP/COEP) | Implemented |
-| MU Packet Parser (C1/C2/C3/C4) | Implemented |
-| ConnectionInfo Rewriter (F4 03) | Implemented |
-| OpenMU via Docker | Configured |
-| **WASM Client** | **Pending** — see [WASM Client](#wasm-client) |
-
-> **Note:** No compatible WASM client exists yet. The proxy and packet parser are implemented but have not been tested with a real game session.
-
-## Quick Start
-
-### Prerequisites
-
-- Node.js 22+
-- Docker and Docker Compose
-
-### 1. Clone and install
+## Install and run
 
 ```bash
-git clone https://github.com/your-username/openmu-browser-stack.git
-cd openmu-browser-stack
-npm install
-cp .env.example .env
+git clone https://github.com/jbaldaraje/MUPinas.git
+cd MUPinas
+bash scripts/install.sh
+bash scripts/start.sh
 ```
 
-### 2. Start OpenMU
+Installation uses `npm ci`, validates Compose, pulls the pinned images and creates an ignored `.env` from `.env.loopback.example` only when no `.env` exists. Existing configuration is preserved. Startup uses the dedicated Compose project `mu-browser`, launches the Node processes and checks the real MU connection flow. Use a single checkout of this deployment at a time; its ports and Compose project name are shared.
+
+All published ports and the Node listeners are bound to `127.0.0.1`. PostgreSQL is reachable only inside the Docker network. In a local installation the web page uses port 8080, the admin panel uses 8090, and the WebSocket proxy uses 7100. A cloud instance's loopback endpoints are internal and cannot be opened as your Mac's local services.
+
+The local override corrects the upstream example's old port mappings: the admin process is configured to listen on container port 80, and the original-protocol Game Server endpoints use 45901–45903. The proxy preserves Game Server port numbers while rewriting redirects to its own host and port. Do not independently remap these host game ports.
+
+## Verify and operate
 
 ```bash
-docker compose up -d
+# Repeat the infrastructure checks
+node scripts/smoke.cjs
+
+# Show status and container logs
+bash scripts/compose.sh ps
+bash scripts/compose.sh logs --tail 100 openmu postgres
+
+# Show Node process logs
+cat .run/proxy.log
+cat .run/web.log
+
+# Stop services while retaining database data
+bash scripts/stop.sh
+
+# Start again and rerun readiness checks
+bash scripts/start.sh
 ```
 
-This starts:
-- **PostgreSQL 16** on port 5433
-- **OpenMU** with auto-start
-  - Admin panel: http://localhost:8090
-  - Connect Server: port 44405
-  - Game Servers: ports 55901-55906
-  - Chat Server: port 55980
+The smoke test requires HTTP 200 and expected page content, COOP/COEP headers, the MU Connect Server hello, a nonempty server list, a rewritten redirect and a successful GameServerEntered greeting through a second WebSocket. A passing result does **not** establish game-account authentication or gameplay.
 
-### 3. Start the proxy and web server
+Data lives in the `mu-browser_pgdata` Docker volume. **Never run `docker compose down -v` unless you intend to erase it.** Stop/start retains data; volumes must be backed up separately when moving to another machine. Git does not contain the database, `.env`, Node dependencies, logs or running processes.
 
-```bash
-npm start
-```
+If ports conflict, stop the conflicting deployment before starting this one. The scripts preserve the upstream source; they do not modify another OpenMU installation. The proxy stores redirects by client IP, so concurrent browser tabs/clients sharing an IP can interfere; that remains an upstream limitation.
 
-Or separately:
-
-```bash
-npm run proxy   # WebSocket proxy on port 7100
-npm run serve   # Web server on port 8080
-```
-
-### 4. Open
-
-Go to http://localhost:8080. You will see a placeholder page — the WASM client is not included. See [WASM Client](#wasm-client) for the next step.
-
-## WASM Client
-
-This repository **does not include** the game client. You need to compile a MU Online client to WebAssembly.
-
-### Recommended client: MuMain
-
-[sven-n/MuMain](https://github.com/sven-n/MuMain) is the best candidate:
-
-- **C++ with OpenGL** — Emscripten maps OpenGL ES to WebGL natively
-- Compatible with OpenMU (standard MU protocol C1/C2/C3/C4)
-
-### Required work
-
-| Task | Description |
-|------|-------------|
-| OpenGL 1.x → OpenGL ES 2.0 | Replace `glBegin`/`glEnd` with VBOs + GLSL ES shaders |
-| Networking .NET → C++ | Rewrite `ClientLibrary` (.NET AOT) in pure C++ |
-| Win32 → SDL2/Emscripten | Replace `windows.h` with SDL2 (cross-platform) |
-| Audio → Web Audio | Replace DirectSound/wzAudio with OpenAL or SDL_mixer |
-| Game loop | Adapt to `emscripten_set_main_loop()` |
-| Assets | Package BMD/OZJ/OZB into Emscripten's `.data` file |
-
-### Integrating the compiled client
-
-1. Compile with Emscripten (outputs `.js`, `.wasm`, `.data`)
-2. Copy to `public/`
-3. Add `<script async src="YourClient.js"></script>` to `public/index.html`
-4. `Module.websocket.url` already points to the proxy (`ws://127.0.0.1:7100`)
-
-## MU Online Protocol
-
-The proxy understands MU packet framing:
-
-| Header | Size | Encryption |
-|--------|------|------------|
-| `C1` | 1 byte (max 255) | None |
-| `C2` | 2 bytes BE (max 65535) | None |
-| `C3` | 1 byte | SimpleModulus / XOR32 |
-| `C4` | 2 bytes BE | SimpleModulus / XOR32 |
-
-The proxy is transparent to encryption. The only exception is the **ConnectionInfo** packet (`C1 F4 03`), whose IP:port is rewritten to redirect connections through the proxy.
-
-## Structure
-
-```
-openmu-browser-stack/
-├── docker-compose.yml          # OpenMU + PostgreSQL
-├── .env.example                # Configuration template
-├── package.json
-├── public/
-│   └── index.html              # HTML template for the WASM client
-└── src/
-    ├── proxy/
-    │   ├── index.js            # Proxy entry point
-    │   ├── ws-server.js        # WebSocket↔TCP bridge
-    │   ├── tcp-client.js       # TCP client wrapper
-    │   ├── packet-parser.js    # MU packet framing (C1/C2/C3/C4)
-    │   └── packet-rewriter.js  # ConnectionInfo (F4 03) rewriter
-    └── web/
-        └── server.js           # Static file server
-```
-
-## Configuration
-
-Copy `.env.example` to `.env`:
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `WS_PORT` | 7100 | WebSocket proxy port |
-| `WEB_PORT` | 8080 | Web server port |
-| `MU_CONNECT_HOST` | 127.0.0.1 | Connect Server host |
-| `MU_CONNECT_PORT` | 44405 | Connect Server port |
-| `MU_GAME_HOST` | 127.0.0.1 | Game Server host (for IP remapping) |
-| `PROXY_PUBLIC_HOST` | 127.0.0.1 | Proxy public IP |
-
-## Troubleshooting
-
-**Port 7100 in use (macOS):** Disable AirPlay Receiver in System Settings → General → AirDrop & Handoff, or change `WS_PORT`.
-
-**OpenMU won't start:** `docker compose down -v && docker compose up -d` to clean up and restart.
-
-## License
-
-MIT
+Configure admin authentication and review network exposure before any remote deployment. Original MU Online assets and trademarks may require separate authorization; the infrastructure's [MIT license](LICENSE) does not license those assets.

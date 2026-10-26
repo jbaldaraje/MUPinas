@@ -1,5 +1,6 @@
 node_modules/
 .env
+.run/
 
 # WASM client files (compiled separately, not part of this repo)
 public/*.wasm
