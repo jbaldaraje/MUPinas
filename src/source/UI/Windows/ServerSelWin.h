@@ -1,0 +1,121 @@
+//*****************************************************************************
+// File: ServerSelWin.h
+//*****************************************************************************
+#pragma once
+
+#include "UI/Core/WindowObject.h"
+#include "UI/RmlBridge/RmlThemedView.h"
+
+#include <vector>
+
+namespace Rml { class ElementDocument; }
+
+class CServerGroup;
+class CServerInfo;
+
+// Pure RmlUi 2D UI: RmlUi owns all of this window's rendering and click handling. Two
+// always-visible columns laid out by server_select.rcss's flexbox rules -- server groups on the
+// left, and the servers within whichever group is selected on the right (empty/hidden until a
+// group is clicked). Self-centers via base.rcss's .center-both; UpdateMouseEvent() claims only its
+// own rect, computed from this window's authored footprint centered the same way.
+class CServerSelWin : public mu::ui::window::CObject
+{
+public:
+    CServerSelWin();
+    ~CServerSelWin() override;
+
+    void Create();
+    void Release();
+    void UpdateDisplay();
+    void Show(bool bShow) override;
+
+
+    // Bound to the RmlUi document's data-event-click callbacks; acts immediately.
+    void RmlClickSelectGroup(int nBtnPos);
+    void RmlClickSelectServer(int nServerIndex);
+
+    // Selects a server group and one of its servers without a click, doing
+    // exactly what the two RmlUi click callbacks do. `groupName` empty or null
+    // picks the first group in the list. Returns false when the list holds no
+    // such group or server, or when the server is full.
+    bool SelectServer(const wchar_t* groupName, int serverIndex);
+
+#ifdef _EDITOR
+    // The ID (CServerGroup::m_iServerIndex) of the open group, or -1; for the
+    // editor, before it builds the groups again.
+    int GetOpenGroupId() const;
+    // After the editor built the groups again: shows them, with the group of
+    // that ID open again wherever it is in the list now, or none when it is gone.
+    void ShowRebuiltGroups(int openGroupId);
+#endif
+
+    // mu::ui::window::IObject
+    bool Render() override;
+    bool Update() override;
+    bool UpdateMouseEvent() override;
+    bool UpdateKeyEvent() override
+    {
+        return true;
+    }
+    // Below CCreditWin/CSysMenuWin: the two can be visible simultaneously, and CSysMenuWin wins click priority.
+    float GetLayerDepth() override
+    {
+        return 20.0f;
+    }
+
+private:
+    void SelectGroup(int nBtnPos);
+    void SyncRmlModel();
+
+    // Shared by RmlClickSelectServer() and SelectServer(). Returns false (and
+    // leaves the window open) without connecting when pServerInfo is null or
+    // the server is full/busy -- the caller decides what busy means to it.
+    bool ConnectToServer(CServerInfo* pServerInfo);
+
+    struct GroupEntry
+    {
+        Rml::String label;
+        int btnPos = 0; // CServerGroup::m_iBtnPos -- passed back to RmlClickSelectGroup; 0 is the rare center/"test server" group
+        bool checked = false;
+    };
+    struct ServerEntry
+    {
+        Rml::String label;
+        int index = 0; // position within the selected group's server list (CServerGroup::GetServerInfo(i))
+        float loadFraction = 0.f;
+        // One bool per color class since RmlUi's data-class-X binds a class per boolean, not a
+        // name. Neither flag set is the default (plain .server-row color).
+        bool colorGray = false;
+        bool colorOrange = false;
+        // No "checked"/selected state here -- clicking a server row connects immediately.
+    };
+    struct ServerSelRmlModel
+    {
+        // One merged, order-preserving list.
+        std::vector<GroupEntry> groups;
+        std::vector<ServerEntry> servers;
+
+        // True once a group has been clicked and its server list requested/populated.
+        bool serverListVisible = false;
+
+        bool pvpNotice = false;
+        Rml::String pvpNoticeLine0, pvpNoticeLine1, pvpNoticeLine2;
+
+        Rml::String descriptionText;
+    };
+    void BindRmlModel(Rml::DataModelConstructor& c, ServerSelRmlModel& model);
+    UI::RmlBridge::ThemedView<ServerSelRmlModel> m_RmlView{"server_select",
+        [this](Rml::DataModelConstructor& c, ServerSelRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/server_select.rml"}}};
+
+    int m_iSelectServerBtnIndex = -1;
+    CServerGroup* m_pSelectServerGroup = nullptr;
+
+    // Fixed, author-chosen footprint used only for UpdateMouseEvent()'s own-rect check
+    // (self-centered the same way SceneUICoordinator.cpp centers every other window); covers
+    // #panel's real max footprint (both columns plus the pvp notice/description text) with slack.
+    static constexpr int kPanelWidth = 420;
+    static constexpr int kPanelHeight = 460;
+};
+
+extern CServerSelWin g_ServerSelWin;

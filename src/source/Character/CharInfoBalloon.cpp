@@ -1,0 +1,150 @@
+//*****************************************************************************
+// File: CharInfoBalloon.cpp
+//*****************************************************************************
+
+#include "stdafx.h"
+#include "CharInfoBalloon.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+#include "Engine/Object/ZzzInterface.h"
+#include "CharacterManager.h"
+#include "I18N/All.h"
+
+#include <algorithm>
+#include <array>
+#include <cwchar>
+
+#include "Camera/CameraProjection.h"
+#include "UI/Scaling/UITransform.h"
+
+namespace
+{
+    template <std::size_t N>
+    void CopyWideString(wchar_t (&destination)[N], const wchar_t* source)
+    {
+        if (source == nullptr)
+        {
+            destination[0] = L'\0';
+            return;
+        }
+
+        std::wcsncpy(destination, source, N - 1);
+        destination[N - 1] = L'\0';
+    }
+
+    struct GuildStatusText
+    {
+        std::uint8_t status;
+        int textIndex;
+    };
+
+    constexpr std::array<GuildStatusText, 5> kGuildStatusTexts{ {
+        {   0, 1330 },
+        {  32, 1302 },
+        {  64, 1301 },
+        { 128, 1300 },
+        { 255, 488 },
+    } };
+
+    BalloonNameStatus ResolveNameStatus(std::uint8_t controlCode)
+    {
+        if (controlCode & CTLCODE_01BLOCKCHAR)
+            return BalloonNameStatus::BlockedCharacter;
+        if (controlCode & (CTLCODE_02BLOCKITEM | CTLCODE_10ACCOUNT_BLOCKITEM))
+            return BalloonNameStatus::BlockedItems;
+        if (controlCode & CTLCODE_04FORTV)
+            return BalloonNameStatus::Normal;
+        if (controlCode & (CTLCODE_08OPERATOR | CTLCODE_20OPERATOR))
+            return BalloonNameStatus::Operator;
+
+        return BalloonNameStatus::Normal;
+    }
+
+    int ResolveGuildTextIndex(std::uint8_t guildStatus)
+    {
+        const auto it = std::lower_bound(
+            kGuildStatusTexts.begin(),
+            kGuildStatusTexts.end(),
+            guildStatus,
+            [](const GuildStatusText& entry, std::uint8_t status) { return entry.status < status; });
+
+        return (it != kGuildStatusTexts.end() && it->status == guildStatus) ? it->textIndex : 0;
+    }
+}
+
+CCharInfoBalloon::CCharInfoBalloon() : m_pCharInfo(nullptr)
+{
+    I18N::RegisterLocaleObserver(&CCharInfoBalloon::OnLocaleChanged, this);
+}
+
+CCharInfoBalloon::~CCharInfoBalloon()
+{
+    I18N::UnregisterLocaleObserver(&CCharInfoBalloon::OnLocaleChanged, this);
+}
+
+void CCharInfoBalloon::OnLocaleChanged(void* ctx) noexcept
+{
+    auto* self = static_cast<CCharInfoBalloon*>(ctx);
+    if (self->m_pCharInfo != nullptr)
+    {
+        self->SetInfo();
+    }
+}
+
+void CCharInfoBalloon::Create(CHARACTER* pCharInfo)
+{
+    CSprite::Create(118, 54, BITMAP_LOG_IN + 7, 0, nullptr, 59, 54);
+
+    m_pCharInfo = pCharInfo;
+    m_eNameStatus = BalloonNameStatus::Normal;
+    std::fill(std::begin(m_szName), std::end(m_szName), L'\0');
+    std::fill(std::begin(m_szGuild), std::end(m_szGuild), L'\0');
+    std::fill(std::begin(m_szClass), std::end(m_szClass), L'\0');
+}
+
+void CCharInfoBalloon::Render()
+{
+    // No longer draws anything (RmlUi owns 100% of this balloon's visuals -- see this class's
+    // header comment) -- still recomputes the live screen position every call, since the
+    // character's world position (and the camera) can change frame to frame. CSprite::SetPosition
+    // keeps this sprite's own GetXPos()/GetYPos() bookkeeping in sync so
+    // CCharInfoBalloonMng::SyncRmlModel() can read it back right after calling this.
+    if (m_pCharInfo == nullptr || !CSprite::m_bShow)
+        return;
+
+    vec3_t afPos;
+    VectorCopy(m_pCharInfo->Object.Position, afPos);
+    afPos[2] += 350.0f;
+
+    int nPosX, nPosY;
+    CameraProjection::WorldToScreen(g_Camera, afPos, &nPosX, &nPosY);
+
+    // WorldToScreen() reports the original's screen stretched over the window.
+    const UI::Scaling::Transform screen =
+        UI::Scaling::ScreenOverlayTransform(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
+    CSprite::SetPosition(static_cast<int>(UI::Scaling::SizeX(screen, static_cast<float>(nPosX))),
+                         static_cast<int>(UI::Scaling::SizeY(screen, static_cast<float>(nPosY))));
+}
+
+void CCharInfoBalloon::SetInfo()
+{
+    if (m_pCharInfo == nullptr)
+        return;
+
+    if (!m_pCharInfo->Object.Live)
+    {
+        CSprite::m_bShow = false;
+        return;
+    }
+
+    CSprite::m_bShow = true;
+
+    m_eNameStatus = ResolveNameStatus(m_pCharInfo->CtlCode);
+
+    CopyWideString(m_szName, m_pCharInfo->ID);
+
+    const int guildTextIndex = ResolveGuildTextIndex(m_pCharInfo->GuildStatus);
+    mu_swprintf_s(m_szGuild, L"(%ls)", I18N::Game::Lookup(guildTextIndex));
+    mu_swprintf_s(m_szClass, L"%ls %d",
+        gCharacterManager.GetCharacterClassText(m_pCharInfo->Class),
+        m_pCharInfo->Level);
+}

@@ -1,0 +1,197 @@
+name: CI
+
+on:
+  push:
+    branches: ['*']
+    paths-ignore:
+      - 'src/bin/Data/**'
+      - 'src/bin/fonts/**'
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Quality Gates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cache quality tools
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            /usr/bin/cppcheck
+            /usr/share/cppcheck
+          key: quality-tools-cppcheck-${{ runner.os }}-v2
+          restore-keys: quality-tools-cppcheck-${{ runner.os }}-
+
+      - name: Install quality tools
+        run: |
+          which cppcheck || { sudo apt-get update && sudo apt-get install -y cppcheck; }
+          pip install clang-format==21.1.8
+
+      - name: Detect changed C++ files
+        id: changed
+        run: |
+          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            # On main push, diff against the previous commit
+            DIFF_BASE=HEAD~1
+          else
+            DIFF_BASE=origin/main
+          fi
+          CHANGED=$(git diff --name-only --diff-filter=d "${DIFF_BASE}...HEAD" -- \
+            'src/source/*.cpp' 'src/source/*.h' 'src/source/*.hpp' \
+            | grep -v ThirdParty/ | grep -v 'src/source/Dotnet/' || true)
+          echo "diff_base=$DIFF_BASE" >> "$GITHUB_OUTPUT"
+          if [ -z "$CHANGED" ]; then
+            echo "count=0" >> "$GITHUB_OUTPUT"
+            echo "No C++ files changed"
+          else
+            COUNT=$(echo "$CHANGED" | wc -l | tr -d ' ')
+            echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+            echo "$CHANGED" > /tmp/changed-cpp-files.txt
+            echo "$COUNT C++ files changed"
+          fi
+
+      - name: Check formatting
+        if: steps.changed.outputs.count != '0'
+        run: |
+          echo "Checking ${{ steps.changed.outputs.count }} files..."
+          base="${{ steps.changed.outputs.diff_base }}"
+          while IFS= read -r file; do
+            format_args=()
+            while read -r start count; do
+              if [ -z "$start" ]; then
+                continue
+              fi
+              if [ -z "$count" ]; then
+                count=1
+              fi
+              if [ "$count" -eq 0 ]; then
+                continue
+              fi
+              end=$((start + count - 1))
+              format_args+=(--lines="${start}:${end}")
+            done < <(
+              git diff --unified=0 --no-color "${base}...HEAD" -- "$file" \
+                | sed -nE 's/^@@ -[0-9]+(,[0-9]+)? \+([0-9]+)(,([0-9]+))? @@.*/\2 \4/p'
+            )
+            if [ "${#format_args[@]}" -ne 0 ]; then
+              clang-format --dry-run --Werror "${format_args[@]}" "$file"
+            fi
+          done < /tmp/changed-cpp-files.txt
+
+      - name: Static analysis
+        if: steps.changed.outputs.count != '0'
+        run: |
+          echo "Linting ${{ steps.changed.outputs.count }} files..."
+          cat /tmp/changed-cpp-files.txt | xargs cppcheck \
+            -j$(nproc) \
+            --max-configs=1 \
+            --error-exitcode=1 \
+            --enable=warning,performance,portability \
+            --std=c++20 \
+            --language=c++ \
+            --suppress=missingInclude \
+            --suppress=unmatchedSuppression \
+            --suppress=unusedFunction \
+            --suppress=*:*/ThirdParty/* \
+            --suppress=useInitializationList \
+            --suppress=passedByValue \
+            --suppress=postfixOperator \
+            --suppress=returnByReference \
+            --suppress=uninitMemberVar \
+            --suppress=uninitMemberVarNoCtor \
+            --inline-suppr
+
+  build-macos:
+    name: macOS Native Build (arm64, Release, editor OFF)
+    runs-on: macos-15
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install build tools
+        run: brew install cmake ninja openssl@3 curl brotli glslang spirv-cross cryptopp
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            out/build/macos-ci/_deps
+            .nuget
+          key: macos-arm64-release-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          restore-keys: macos-arm64-release-deps-
+
+      - name: Configure CMake
+        run: >
+          cmake --preset macos-arm64
+          -B out/build/macos-ci
+          -DCMAKE_C_COMPILER=/usr/bin/clang
+          -DCMAKE_CXX_COMPILER=/usr/bin/clang++
+          -DENABLE_EDITOR=OFF
+          -DMU_COPY_RUNTIME_ASSETS=OFF
+          -DBUILD_TESTING=ON
+          -DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
+
+      - name: Build
+        run: cmake --build out/build/macos-ci --config Release
+
+      - name: Run tests
+        run: >
+          ctest --test-dir out/build/macos-ci --build-config Release
+          --output-on-failure
+          --parallel 1
+          --no-tests=error
+
+      - name: Validate runtime
+        run: |
+          runtime_directory="out/build/macos-ci/src/Release/Main.app/Contents/MacOS"
+          for path in \
+            "$runtime_directory/Main" \
+            "$runtime_directory/MUnique.Client.Library.dylib" \
+            "$runtime_directory/config.ini" \
+            "$runtime_directory/shaders"
+          do
+            if [ ! -e "$path" ]; then
+              echo "Missing required runtime path: $path" >&2
+              exit 1
+            fi
+          done
+          for path in "$runtime_directory/Data" "$runtime_directory/fonts"; do
+            if [ -e "$path" ]; then
+              echo "Unexpected bundled game data: $path" >&2
+              exit 1
+            fi
+          done
+
+      - name: Archive runtime
+        if: github.event_name == 'push'
+        run: tar -czf MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz -C out/build/macos-ci/src/Release Main.app
+
+      - name: Upload runtime artifact
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mu-client-macos-native-arm64-release-editor-off-no-data-main
+          path: MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz
+          if-no-files-found: error

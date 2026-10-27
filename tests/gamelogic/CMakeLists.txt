@@ -1,0 +1,76 @@
+mu_add_test(
+    NAME test_boid_steering
+    SOURCES
+        test_boid_steering.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_head_movement
+    SOURCES
+        test_head_movement.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_smooth_turning
+    SOURCES
+        test_smooth_turning.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_earthquake_falloff
+    SOURCES
+        test_earthquake_falloff.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_reference_frame_steps
+    SOURCES
+        test_reference_frame_steps.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_direction_turning
+    SOURCES
+        test_direction_turning.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_personal_shop_currency
+    SOURCES
+        test_personal_shop_currency.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_helper_attack_rotation
+    SOURCES
+        test_helper_attack_rotation.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME test_character_realism
+    SOURCES
+        test_character_realism.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
+    LINK_LIBS
+        MuClient
+)

@@ -1,19 +1,118 @@
-node_modules/
-.env
-.run/
 
-# WASM client files (compiled separately, not part of this repo)
-public/*.wasm
-public/*.wasm.bak
-public/*.data
+.vs/
+.nuget/
 
-# OS files
+graphify-out
+
+
+src/source/Global Debug/
+src/Global Debug/
+src/Global Debug/Main
+src/source/Global Release/
+src/Global Release/
+src/Global Release/Main
+
+# External dependencies (built locally; matches the dir and the symlink form)
+_deps
+
+# CMake build directories
+/build/
+build-mingw/
+build-linux/
+/cmake-build-debug/
+/cmake-build-release/
+/CMakeFiles/
+**/cmake-build-debug/
+**/cmake-build-release/
+**/CMakeFiles/
+/Win32/
+/out/
+/diag/
+
+# .NET build outputs
+**/bin/**
+!**/bin/Translations/
+!**/bin/Translations/**
+!src/bin/
+!src/bin/MuMainIcon.png
+# Bundled UI fonts (curated, shipped with the client) are source-controlled.
+!**/bin/fonts/
+!**/bin/fonts/**
+# RmlUi UI content (RML/RCSS documents and themes) is authored source, not build output.
+!src/bin/Data/
+!src/bin/Data/Interface/
+!src/bin/Data/Interface/RmlUi/
+!src/bin/Data/Interface/RmlUi/**
+# Item data (JSON, written by the item editor) is source-controlled.
+!src/bin/Data/Items/
+!src/bin/Data/Items/**
+src/bin/Data/Items/**/*.tmp
+# Monster data (JSON, written by the monster tools) is source-controlled.
+!src/bin/Data/Monsters/
+!src/bin/Data/Monsters/**
+src/bin/Data/Monsters/**/*.tmp
+# Effect data (JSON), e.g. the glow colors of the items.
+!src/bin/Data/Effects/
+!src/bin/Data/Effects/**
+# Map data (JSON), e.g. the light mood of the world maps.
+!src/bin/Data/Maps/
+!src/bin/Data/Maps/**
+# Render data (JSON), e.g. the look profile of the Enhanced features.
+!src/bin/Data/Render/
+!src/bin/Data/Render/**
+# Colour grading tables (PNG) of the Enhanced post-processing, one per world.
+!src/bin/Data/Grading/
+!src/bin/Data/Grading/**
+**/obj/
+*.user
+*.suo
+
+# Jetbrains Ides
+/.idea/
+**/.idea/
+
+# ImGui
+**/imgui.ini
+
+**/*.log
+
+# macOS metadata
 .DS_Store
+**/.DS_Store
+
+# Local build outputs
+/out/
+/build_validation/
+/build-test-upstream-sync/
+src/graphify-out/
+
+# Local agent/tool state
+.claude/
+.paw/
+.remember/
+.superpowers/
+.worktrees/
+
+# Test caches
+.pytest_cache/
+
+# Interrupted editor/temp files
+.!*
+**/.!*
+
+# Local-only files
+docs/reviews/
+
+# In-game test runner output (docs/in-game-tests.md)
+in-game-test-results/
+
+# Local client package and machine-specific files must not be published.
+/MU_S6E3/
+**/__pycache__/
+*.py[cod]
 Thumbs.db
-
-# IDE
-.vscode/
-.idea/
-
-# Cloned client repositories (for local analysis only)
-clients/
+.env
+.env.*
+!.env.example
+!.env.*.example
+/src/bin/config.ini
