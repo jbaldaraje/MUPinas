@@ -86,6 +86,12 @@ void GameConfig::Load()
     m_rmlTheme = ReadString(CfgSectionUI, CfgKeyRmlTheme, CfgDefaultRmlTheme);
     m_uiScalePercent = std::clamp(ReadInt(CfgSectionUI, CfgKeyUIScalePercent, CfgDefaultUIScalePercent),
                                   CfgDefaults::CfgMinUIScalePercent, CfgDefaults::CfgMaxUIScalePercent);
+    m_damageNumberSizePercent = std::clamp(
+        ReadInt(CfgSectionUI, CfgKeyDamageNumberSizePercent, CfgDefaultDamageNumberSizePercent),
+        CfgMinDamageNumberSizePercent, CfgMaxDamageNumberSizePercent);
+    m_damageNumberWeight = std::clamp(
+        ReadInt(CfgSectionUI, CfgKeyDamageNumberWeight, CfgDefaultDamageNumberWeight),
+        CfgMinDamageNumberWeight, CfgMaxDamageNumberWeight);
     m_enableAnimationTaskPool =
         ReadBool(CfgSectionUI, CfgKeyEnableAnimationTaskPool, CfgDefaultEnableAnimationTaskPool);
 
@@ -159,6 +165,8 @@ void GameConfig::Save()
     WriteString(CfgSectionUI, CfgKeyFont, m_fontSelection);
     WriteString(CfgSectionUI, CfgKeyRmlTheme, m_rmlTheme);
     WriteInt(CfgSectionUI, CfgKeyUIScalePercent, m_uiScalePercent);
+    WriteInt(CfgSectionUI, CfgKeyDamageNumberSizePercent, m_damageNumberSizePercent);
+    WriteInt(CfgSectionUI, CfgKeyDamageNumberWeight, m_damageNumberWeight);
 
     WriteInt(CfgSectionCamera, CfgKeyZoom, m_zoom);
     WriteBool(CfgSectionRender, CfgKeyVSync, m_vsyncEnabled);
@@ -356,6 +364,18 @@ void GameConfig::SetUIScalePercent(int percent)
     // console command) is a user-facing dial, and silently keeping the previous value would look
     // like the control did nothing. See CfgMinUIScalePercent's own comment for the bounds.
     m_uiScalePercent = std::clamp(percent, CfgDefaults::CfgMinUIScalePercent, CfgDefaults::CfgMaxUIScalePercent);
+}
+
+void GameConfig::SetDamageNumberSizePercent(int percent)
+{
+    m_damageNumberSizePercent = std::clamp(percent, CfgDefaults::CfgMinDamageNumberSizePercent,
+        CfgDefaults::CfgMaxDamageNumberSizePercent);
+}
+
+void GameConfig::SetDamageNumberWeight(int weight)
+{
+    m_damageNumberWeight = std::clamp(weight, CfgDefaults::CfgMinDamageNumberWeight,
+        CfgDefaults::CfgMaxDamageNumberWeight);
 }
 
 void GameConfig::SetEncryptedUsername(const std::wstring& encryptedUsername)

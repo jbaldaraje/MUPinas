@@ -33,6 +33,7 @@ private:
     void Toggle();
     void Close();
     void RunAction(const Rml::String& action);
+    void SaveDamageStyle();
     void Send(const std::wstring& command);
     void SyncServerState();
     void SyncDiagnostics();

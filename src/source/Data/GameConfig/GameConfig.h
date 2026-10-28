@@ -96,6 +96,12 @@ public:
     int GetUIScalePercent() const { return m_uiScalePercent; }
     void SetUIScalePercent(int percent);
 
+    // Floating combat numbers use a digit atlas. Weight controls extra edge passes.
+    int GetDamageNumberSizePercent() const { return m_damageNumberSizePercent; }
+    void SetDamageNumberSizePercent(int percent);
+    int GetDamageNumberWeight() const { return m_damageNumberWeight; }
+    void SetDamageNumberWeight(int weight);
+
     // Chat commands - the favourites and the named templates of the command
     // window. They belong to the installation, not to a character.
     // A template is stored as "name|command|value|value|...".
@@ -228,6 +234,8 @@ private:
     std::wstring m_fontSelection;
     std::wstring m_rmlTheme;
     int m_uiScalePercent;
+    int m_damageNumberSizePercent;
+    int m_damageNumberWeight;
     bool m_enableAnimationTaskPool;
 
     int m_zoom;

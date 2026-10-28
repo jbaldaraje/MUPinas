@@ -9,6 +9,8 @@
 #include "UI/Placement/WindowPlacement.h"
 #include "GameLogic/Commands/ChatCommandCatalog.h"
 #include "GameLogic/Testing/TestingSession.h"
+#include "Data/GameConfig/GameConfig.h"
+#include "Data/GameConfig/GameConfigConstants.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "UI/Core/WindowCommon.h"
 #include "UI/Core/WindowAccess.h"
@@ -100,6 +102,8 @@ void CTestingHelperWindow::BindModel(Rml::DataModelConstructor& c, TestingHelper
     c.Bind("lifetime", &model.lifetime);
     c.Bind("level", &model.level);
     c.Bind("bot_name", &model.botName);
+    c.Bind("damage_size", &model.damageSize);
+    c.Bind("damage_weight", &model.damageWeight);
     SetLabels(model);
     c.BindEventCallback("testing_action", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
     {
@@ -194,6 +198,14 @@ void CTestingHelperWindow::SetLabels(TestingHelperRmlModel& model)
         I18N::Testing::DropEffective,
         I18N::Testing::DiagnosticsOrder,
         I18N::Testing::ServerMetricsOrder,
+        I18N::Testing::DamageDisplay,
+        I18N::Testing::DamageSize,
+        I18N::Testing::DamageWeight,
+        I18N::Testing::SaveDisplay,
+        I18N::Testing::NormalWeight,
+        I18N::Testing::BoldWeight,
+        I18N::Testing::HeavyWeight,
+        I18N::Testing::DisplaySaved,
     };
     model.title = I18N::Testing::Title;
 }
@@ -225,7 +237,10 @@ void CTestingHelperWindow::Show(bool visible)
     model.x = std::to_string(Hero->PositionX);
     model.y = std::to_string(Hero->PositionY);
     model.map = std::to_string(gMapManager.WorldActive);
-    for (const auto* field : {"x", "y", "map"}) m_view.MarkDirty(field);
+    const auto& config = GameConfig::GetInstance();
+    model.damageSize = std::to_string(config.GetDamageNumberSizePercent());
+    model.damageWeight = std::to_string(config.GetDamageNumberWeight());
+    for (const auto* field : {"x", "y", "map", "damage_size", "damage_weight"}) m_view.MarkDirty(field);
     UI::RmlBridge::SyncDocumentVisibilityInFront(m_view.Document(), true);
     Send(L"/localtest status");
 }
@@ -286,9 +301,36 @@ void CTestingHelperWindow::Send(const std::wstring& command)
     GameLogic::Commands::Catalog().Execute(command);
 }
 
+void CTestingHelperWindow::SaveDamageStyle()
+{
+    auto& m = m_view.GetModel();
+    if (!ValidFields({m.damageSize}) ||
+        (m.damageWeight != "0" && m.damageWeight != "1" && m.damageWeight != "2"))
+    {
+        m.feedback = I18N::Testing::Invalid;
+        m_view.MarkDirty("feedback");
+        return;
+    }
+    const int size = std::stoi(m.damageSize);
+    if (size < CfgDefaults::CfgMinDamageNumberSizePercent ||
+        size > CfgDefaults::CfgMaxDamageNumberSizePercent)
+    {
+        m.feedback = I18N::Testing::Invalid;
+        m_view.MarkDirty("feedback");
+        return;
+    }
+    auto& config = GameConfig::GetInstance();
+    config.SetDamageNumberSizePercent(size);
+    config.SetDamageNumberWeight(std::stoi(m.damageWeight));
+    config.Save();
+    m.feedback = I18N::Testing::DisplaySaved;
+    m_view.MarkDirty("feedback");
+}
+
 void CTestingHelperWindow::RunAction(const Rml::String& action)
 {
     if (action == "close") { Close(); return; }
+    if (action == "display") { SaveDamageStyle(); return; }
     auto& m = m_view.GetModel();
     if (action == "refresh") { Send(L"/localtest status"); return; }
     if (action.starts_with("count_"))

@@ -13,7 +13,30 @@
 #include "ZzzEffect.h"
 #include "Audio/DSPlaySound.h"
 #include "Network/Server/WSclient.h"
+#include "Data/GameConfig/GameConfig.h"
 #include "UI/Core/WindowSystem.h"
+
+namespace
+{
+constexpr float DamageNumberPercentFactor = 0.01f;
+constexpr float DamageNumberStrokeFraction = 0.06f;
+
+void RenderDamageDigit(vec3_t position, float uv[4][2], vec3_t light[4], float alpha,
+    float scale, int weight, float cosTh, float sinTh)
+{
+    const float stroke = scale * DamageNumberStrokeFraction;
+    for (int pass = 0; pass < weight; ++pass)
+    {
+        vec3_t shifted;
+        VectorCopy(position, shifted);
+        const float direction = pass == 0 ? -1.f : 1.f;
+        shifted[0] += direction * stroke * cosTh;
+        shifted[1] -= direction * stroke * sinTh;
+        RenderSpriteUV(BITMAP_FONT + 1, shifted, scale, scale, uv, light, alpha);
+    }
+    RenderSpriteUV(BITMAP_FONT + 1, position, scale, scale, uv, light, alpha);
+}
+} // namespace
 
 PARTICLE Points[MAX_POINTS];
 
@@ -49,6 +72,9 @@ void CreatePoint(vec3_t Position, int Value, vec3_t Color, float scale, bool bMo
 
 void RenderNumberPoints(vec3_t Position, int Num, vec3_t Color, float Alpha, float Scale)
 {
+    const auto& config = GameConfig::GetInstance();
+    const float size = Scale * config.GetDamageNumberSizePercent() * DamageNumberPercentFactor;
+    const int weight = config.GetDamageNumberWeight();
     vec3_t p;
     VectorCopy(Position, p);
     vec3_t Light[4];
@@ -61,8 +87,8 @@ void RenderNumberPoints(vec3_t Position, int Num, vec3_t Color, float Alpha, flo
     snprintf(Text, sizeof(Text), "%d", Num);
     p[0] -= strlen(Text) * 5.f;
     unsigned int Length = strlen(Text);
-    p[0] -= Length * Scale * 0.125f;
-    p[1] -= Length * Scale * 0.125f;
+    p[0] -= Length * size * 0.125f;
+    p[1] -= Length * size * 0.125f;
 
     float sinTh = sinf((float)(ANGLE_TO_RAD * (g_Camera.Angle[2])));
     float cosTh = cosf((float)(ANGLE_TO_RAD * (g_Camera.Angle[2])));
@@ -75,9 +101,9 @@ void RenderNumberPoints(vec3_t Position, int Num, vec3_t Color, float Alpha, flo
         TEXCOORD(UV[1], u + 16.f / 256.f, 16.f / 32.f);
         TEXCOORD(UV[2], u + 16.f / 256.f, 0.f);
         TEXCOORD(UV[3], u, 0.f);
-        RenderSpriteUV(BITMAP_FONT + 1, p, Scale, Scale, UV, Light, Alpha);
-        p[0] += Scale / 0.7071067f * cosTh / 2;
-        p[1] -= Scale / 0.7071067f * sinTh / 2;
+        RenderDamageDigit(p, UV, Light, Alpha, size, weight, cosTh, sinTh);
+        p[0] += size / 0.7071067f * cosTh / 2;
+        p[1] -= size / 0.7071067f * sinTh / 2;
     }
 }
 

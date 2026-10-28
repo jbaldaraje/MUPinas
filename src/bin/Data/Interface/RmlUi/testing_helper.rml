@@ -37,7 +37,17 @@
             <div class="testing-fields"><label class="testing-field">{{text[40]}}<input class="text-field" type="text" data-value="bot_name" maxlength="10"/></label></div><div class="testing-actions"><div class="btn testing-button" data-class-disabled="busy || !administrator || !available" data-event-click="testing_action('remove')">{{text[39]}}</div></div>
         </div>
         <div class="testing-page" data-class-active="tab == 4"><p>{{text[44]}}</p><div class="testing-actions"><div class="btn testing-button" data-class-disabled="busy" data-event-click="testing_action('market')">{{text[42]}}</div><div class="btn testing-button" data-class-disabled="busy" data-event-click="testing_action('shop')">{{text[43]}}</div></div></div>
-        <div class="testing-page" data-class-active="tab == 5"><p>{{text[72]}}</p><div class="testing-summary">{{diagnostics}}</div><p>{{text[73]}}</p><div class="testing-summary">{{server_metrics}}</div><p>{{text[53]}}</p><div class="testing-actions"><div class="btn testing-button" data-class-disabled="busy || !administrator || !available" data-event-click="testing_action('stop')">{{text[45]}}</div></div></div>
+        <div class="testing-page" data-class-active="tab == 5">
+            <p>{{text[72]}}</p><div class="testing-summary">{{diagnostics}}</div>
+            <p>{{text[73]}}</p><div class="testing-summary">{{server_metrics}}</div>
+            <p>{{text[74]}}</p>
+            <div class="testing-fields">
+                <label class="testing-field">{{text[75]}}<input class="text-field text-field--numeric" type="text" data-value="damage_size" maxlength="3"/></label>
+                <label class="testing-field">{{text[76]}}<select class="text-field" data-value="damage_weight"><option value="0">{{text[78]}}</option><option value="1">{{text[79]}}</option><option value="2">{{text[80]}}</option></select></label>
+            </div>
+            <div class="testing-actions"><div class="btn testing-button" data-event-click="testing_action('display')">{{text[77]}}</div></div>
+            <p>{{text[53]}}</p><div class="testing-actions"><div class="btn testing-button" data-class-disabled="busy || !administrator || !available" data-event-click="testing_action('stop')">{{text[45]}}</div></div>
+        </div>
     </div>
     <div class="testing-footer testing-actions"><div class="btn testing-button" data-class-disabled="!administrator || !available" data-event-click="testing_action('stop')">{{text[45]}}</div><div class="btn testing-button" data-class-disabled="busy" data-event-click="testing_action('refresh')">{{text[7]}}</div><div class="btn testing-button" data-class-disabled="busy" id="testing_close" data-event-click="testing_action('close')">{{text[8]}}</div></div>
 </body>

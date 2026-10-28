@@ -46,6 +46,8 @@ namespace CfgKeys
     // Rml::Context::SetDensityIndependentPixelRatio(). Only RCSS authored in `dp` units responds
     // to this; existing `px`-authored windows are unaffected until retrofitted.
     inline constexpr wchar_t CfgKeyUIScalePercent[] = L"UIScalePercent";
+    inline constexpr wchar_t CfgKeyDamageNumberSizePercent[] = L"DamageNumberSizePercent";
+    inline constexpr wchar_t CfgKeyDamageNumberWeight[] = L"DamageNumberWeight";
     // Animates characters on worker threads when many are in view. Off unless set here or
     // started with --enable-taskpool; manual config.ini edit only.
     inline constexpr wchar_t CfgKeyEnableAnimationTaskPool[] = L"EnableAnimationTaskPool";
@@ -136,6 +138,13 @@ namespace CfgDefaults
     // above 150% a docked panel no longer fits a small window.
     inline constexpr int CfgMinUIScalePercent = 75;
     inline constexpr int CfgMaxUIScalePercent = 150;
+
+    inline constexpr int CfgDefaultDamageNumberSizePercent = 125;
+    inline constexpr int CfgMinDamageNumberSizePercent = 75;
+    inline constexpr int CfgMaxDamageNumberSizePercent = 200;
+    inline constexpr int CfgDefaultDamageNumberWeight = 1;
+    inline constexpr int CfgMinDamageNumberWeight = 0;
+    inline constexpr int CfgMaxDamageNumberWeight = 2;
 
     inline constexpr bool CfgDefaultEnableAnimationTaskPool = false;
 

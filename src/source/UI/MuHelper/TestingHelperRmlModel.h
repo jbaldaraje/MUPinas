@@ -50,5 +50,7 @@ struct TestingHelperRmlModel
     Rml::String lifetime = "300";
     Rml::String level = "100";
     Rml::String botName;
+    Rml::String damageSize;
+    Rml::String damageWeight;
 };
 } // namespace mu::ui::window

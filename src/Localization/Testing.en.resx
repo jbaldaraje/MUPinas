@@ -76,4 +76,12 @@
   <data name="DropEffective" xml:space="preserve"><value>Drop factor / guaranteed groups / eligible groups</value></data>
   <data name="DiagnosticsOrder" xml:space="preserve"><value>Players / test bots / client frame time (ms)</value></data>
   <data name="ServerMetricsOrder" xml:space="preserve"><value>Process CPU (%) / memory (MiB) / testing maintenance (ms) / generated monsters</value></data>
+  <data name="DamageDisplay" xml:space="preserve"><value>Combat damage numbers (local display)</value></data>
+  <data name="DamageSize" xml:space="preserve"><value>Size (75–200%)</value></data>
+  <data name="DamageWeight" xml:space="preserve"><value>Weight</value></data>
+  <data name="SaveDisplay" xml:space="preserve"><value>Save damage style</value></data>
+  <data name="NormalWeight" xml:space="preserve"><value>Normal</value></data>
+  <data name="BoldWeight" xml:space="preserve"><value>Bold</value></data>
+  <data name="HeavyWeight" xml:space="preserve"><value>Heavy</value></data>
+  <data name="DisplaySaved" xml:space="preserve"><value>Damage style saved. Changes apply immediately.</value></data>
 </root>
