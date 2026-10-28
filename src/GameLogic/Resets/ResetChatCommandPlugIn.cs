@@ -29,7 +29,14 @@ public class ResetChatCommandPlugIn : IChatCommandPlugIn
     /// <inheritdoc />
     public async ValueTask HandleCommandAsync(Player player, string command)
     {
+        var arguments = command.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        ResetDestination? destination = arguments.Length == 1 ? null : arguments.Length == 2 ? arguments[1] switch
+        {
+            "stay" => ResetDestination.StayOnCurrentMap,
+            "lorencia" => ResetDestination.Lorencia,
+            _ => (ResetDestination)(-1),
+        } : (ResetDestination)(-1);
         var resetAction = new ResetCharacterAction(player);
-        await resetAction.ResetCharacterAsync().ConfigureAwait(false);
+        await resetAction.ResetCharacterAsync(destination).ConfigureAwait(false);
     }
 }
