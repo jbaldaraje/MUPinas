@@ -82,6 +82,7 @@
 
 #include "UI/Inventory/LuckyItemWnd.h"
 #include "UI/MuHelper/MuHelperConfigWindow.h"
+#include "UI/MuHelper/TestingHelperWindow.h"
 #include "UI/MuHelper/MuHelperSkillPicker.h"
 #include "UI/MuHelper/MuHelperDetailWindow.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
@@ -188,6 +189,7 @@ namespace mu::ui::window
         COptionWindow* m_pNewOptionWindow;
         CHelpWindow* m_pNewHelpWindow;
         CChatCommandWindow* m_pNewChatCommandWindow;
+        CTestingHelperWindow* m_pTestingHelper = nullptr;
         CItemExplanationWindow* m_pNewItemExplanationWindow;
         CSetItemExplanation* m_pNewSetItemExplanation;
         CQuickCommandWindow* m_pNewQuickCommandWindow;
@@ -230,6 +232,7 @@ namespace mu::ui::window
         CGenericMenuDialog* m_pGenericMenuDialog;
 
         bool CreateChatCommandWindow();
+        bool CreateTestingHelperWindow();
 
     public:
         CChatInputBox* GetUI_NewChatInputBox() const;

@@ -116,3 +116,6 @@ Thumbs.db
 !.env.example
 !.env.*.example
 /src/bin/config.ini
+
+# Active upstream OpenMU worktree; the tested source is linked separately below.
+/server/OpenMU/

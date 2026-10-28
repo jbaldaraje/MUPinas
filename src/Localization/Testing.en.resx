@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <data name="Title" xml:space="preserve"><value>Local Testing Helper</value></data>
+  <data name="Reset" xml:space="preserve"><value>Reset</value></data>
+  <data name="Rates" xml:space="preserve"><value>Rates &amp; Caps</value></data>
+  <data name="Spots" xml:space="preserve"><value>Monster Spots</value></data>
+  <data name="Crowd" xml:space="preserve"><value>Test Crowd</value></data>
+  <data name="Market" xml:space="preserve"><value>Loren Market</value></data>
+  <data name="Diagnostics" xml:space="preserve"><value>Diagnostics</value></data>
+  <data name="Refresh" xml:space="preserve"><value>Refresh</value></data>
+  <data name="Close" xml:space="preserve"><value>Close</value></data>
+  <data name="Stay" xml:space="preserve"><value>Reset and stay here</value></data>
+  <data name="Lorencia" xml:space="preserve"><value>Reset to Lorencia</value></data>
+  <data name="ResetNote" xml:space="preserve"><value>Uses the configured level, Zen, item costs, stat rules and reset limit. No bypass.</value></data>
+  <data name="Xp" xml:space="preserve"><value>Normal XP multiplier</value></data>
+  <data name="Drop" xml:space="preserve"><value>Ordinary drop multiplier</value></data>
+  <data name="Speed" xml:space="preserve"><value>Attack / magic speed cap</value></data>
+  <data name="Stat" xml:space="preserve"><value>Base / total stat cap</value></data>
+  <data name="SaveRates" xml:space="preserve"><value>Save rates</value></data>
+  <data name="SaveCaps" xml:space="preserve"><value>Save caps</value></data>
+  <data name="Enable" xml:space="preserve"><value>Enable preset</value></data>
+  <data name="Disable" xml:space="preserve"><value>Restore baseline</value></data>
+  <data name="Map" xml:space="preserve"><value>Map ID, or all</value></data>
+  <data name="Target" xml:space="preserve"><value>Monsters per map</value></data>
+  <data name="Group" xml:space="preserve"><value>Monsters per spot</value></data>
+  <data name="Respawn" xml:space="preserve"><value>Respawn seconds</value></data>
+  <data name="Spacing" xml:space="preserve"><value>Spot spacing</value></data>
+  <data name="Preview" xml:space="preserve"><value>Preview</value></data>
+  <data name="Apply" xml:space="preserve"><value>Apply</value></data>
+  <data name="Cleanup" xml:space="preserve"><value>Remove test monsters</value></data>
+  <data name="SpotNote" xml:space="preserve"><value>Generated monsters are separate from natural spawns. All maps activate in stages.</value></data>
+  <data name="Count" xml:space="preserve"><value>Crowd count (1–100)</value></data>
+  <data name="Behavior" xml:space="preserve"><value>Behavior</value></data>
+  <data name="Idle" xml:space="preserve"><value>Idle</value></data>
+  <data name="Wander" xml:space="preserve"><value>Wander</value></data>
+  <data name="Combat" xml:space="preserve"><value>Combat</value></data>
+  <data name="Radius" xml:space="preserve"><value>Spread radius</value></data>
+  <data name="Lifetime" xml:space="preserve"><value>Lifetime seconds</value></data>
+  <data name="Level" xml:space="preserve"><value>New bot level</value></data>
+  <data name="Spawn" xml:space="preserve"><value>Create crowd</value></data>
+  <data name="RemoveAll" xml:space="preserve"><value>Remove all test bots</value></data>
+  <data name="RemoveSelected" xml:space="preserve"><value>Remove selected bot</value></data>
+  <data name="BotName" xml:space="preserve"><value>Test character name</value></data>
+  <data name="CrowdNote" xml:space="preserve"><value>Server-side characters exercise AI and visible entity rendering. They are not connected test clients.</value></data>
+  <data name="EnterMarket" xml:space="preserve"><value>Enter / return</value></data>
+  <data name="OpenShop" xml:space="preserve"><value>Open personal shop</value></data>
+  <data name="MarketNote" xml:space="preserve"><value>Loren Market and personal shops. A global auction or listing service is separate.</value></data>
+  <data name="Stop" xml:space="preserve"><value>Emergency stop</value></data>
+  <data name="Waiting" xml:space="preserve"><value>Waiting for server…</value></data>
+  <data name="Unavailable" xml:space="preserve"><value>The server has not advertised local testing support. Refresh after connecting to the updated server.</value></data>
+  <data name="Ready" xml:space="preserve"><value>Server settings received.</value></data>
+  <data name="Denied" xml:space="preserve"><value>Administrator permission is required.</value></data>
+  <data name="Invalid" xml:space="preserve"><value>Check the values. The server rejected the request.</value></data>
+  <data name="Failed" xml:space="preserve"><value>The action failed. Check the server log.</value></data>
+  <data name="TimedOut" xml:space="preserve"><value>No response received. Check the connection and refresh.</value></data>
+  <data name="AdminNote" xml:space="preserve"><value>Only server-authorized game masters can change testing settings.</value></data>
+  <data name="Saved" xml:space="preserve"><value>Saved</value></data>
+  <data name="Effective" xml:space="preserve"><value>Effective</value></data>
+  <data name="Master" xml:space="preserve"><value>Master XP</value></data>
+  <data name="Actual" xml:space="preserve"><value>Active test bots</value></data>
+  <data name="FrameTime" xml:space="preserve"><value>Current frame time (ms)</value></data>
+  <data name="NoRestart" xml:space="preserve"><value>Preset edits apply live. The server plugin must already be installed.</value></data>
+  <data name="Location" xml:space="preserve"><value>Center X / Y</value></data>
+  <data name="DropNote" xml:space="preserve"><value>Probabilities are multiplied from the saved baseline and capped at 100%. Money, quest and item-reward tables are excluded.</value></data>
+  <data name="PreviewHeader" xml:space="preserve"><value>Map / requested / planned or allocated / alive / reason</value></data>
+  <data name="AllMaps" xml:space="preserve"><value>All eligible maps</value></data>
+  <data name="MapChoice" xml:space="preserve"><value>Map selection</value></data>
+  <data name="CenterX" xml:space="preserve"><value>Center X</value></data>
+  <data name="CenterY" xml:space="preserve"><value>Center Y</value></data>
+  <data name="SavedOrder" xml:space="preserve"><value>Normal XP / item drops / speed cap / stat cap</value></data>
+  <data name="EffectiveOrder" xml:space="preserve"><value>Normal XP / master XP / speed cap / stat cap</value></data>
+  <data name="SaveSpots" xml:space="preserve"><value>Save spot settings</value></data>
+  <data name="ResetInfoOrder" xml:space="preserve"><value>Required level / Zen / items / current resets / reset limit (0 = unlimited)</value></data>
+  <data name="DropEffective" xml:space="preserve"><value>Drop factor / guaranteed groups / eligible groups</value></data>
+  <data name="DiagnosticsOrder" xml:space="preserve"><value>Players / test bots / client frame time (ms)</value></data>
+  <data name="ServerMetricsOrder" xml:space="preserve"><value>Process CPU (%) / memory (MiB) / testing maintenance (ms) / generated monsters</value></data>
+</root>

@@ -63,7 +63,7 @@ the seconds of a frame are `FPS_ANIMATION_FACTOR / REFERENCE_FPS`. Below 25 FPS 
 1. Objects, items, boids.
 2. **`MoveHero`** (`Engine/Object/ZzzInterface.cpp`): the hero's head (`UpdateHeroLook`: who nodded at it, what it
    looks at, idle glances; else the cursor), walking (`MovePath`, `StepMomentum`, `MoveCharacterPosition`) or turning
-   on the spot (toward the cursor), then its flight feel, turn lag and slope lean.
+   on the spot (toward a world click), then its flight feel, turn lag and slope lean.
 3. **`MoveCharactersClient`** (`ZzzCharacter.cpp`): for every slot `MoveCharacterClient`:
    `MoveMonsterClient` (paths and walking; returns at once for the hero), `FinishPendingTurn`, **`MoveCharacter`**
    (copies the action to the model and **advances the animation**: `CharacterAnimation` → `BMD::PlayAnimation`; also
@@ -178,11 +178,17 @@ is `CHARACTER::Motion`.
 
 Smooth turning itself (`StepEasedTurn`, `TurnTowardsMoveHeading`, `StartStandingTurn`, `FinishPendingTurn`) stays in
 `Engine/AI` with the paths, and the mounts' own feel (`UpdateMountFeel`) in `GOBoid.cpp`; the cursor turn of the
-standing hero stays in `ZzzInterface.cpp`.
+standing hero is initiated in `ZzzInterface.cpp` and updated by `HeroCursorTurn`.
 
 - **The Enhanced Movement gate** (`Engine/Object/EnhancedMovement.h`, the `[Render] EnhancedMovement` option): every
   feature asks `EnhancedMovementEnabled()` each frame. Off, characters move and are drawn as before them; whatever a
   feature had applied (a bank, a lean, a bow, a lag, a fade) fades out or is taken off, rather than snapping.
+- **Click-directed facing:** hovering never starts or redirects a body turn. Left-clicking the world starts a
+  standing turn immediately; holding the click may update its direction. After release, an enhanced standing turn
+  finishes toward the last clicked direction, then synchronizes that facing with the server once. UI clicks and
+  clicks during incompatible actions do not initiate these turns. Cursor-driven head aiming also requires a world
+  click; ambient head glances, greetings and looking at nearby characters remain available. With Enhanced Movement
+  off, the legacy facing snap likewise requires a world click instead of turning periodically on hover.
 - **Pose fades:** a player's switch of action fades the old pose out over 0.25 s when it goes to moving, riding,
   emotes, sitting or poses, 0.08 s into anything else (an attack, a skill, a hit: it still starts at once), and not at
   all from or into death, getting up and the special transformations. Between two steppings (stand, walk, run) the new action starts where

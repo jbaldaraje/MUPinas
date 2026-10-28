@@ -262,8 +262,7 @@ void CreateLogInScene()
 
     CSceneUICoordinator::Instance().CreateLoginScene();
 
-    CurrentProtocolState = REQUEST_JOIN_SERVER;
-    CreateSocket(szServerIpAddress, g_ServerPort);
+    ConnectToConnectServer();
 
     GuildInputEnable = false;
     TabInputEnable = false;

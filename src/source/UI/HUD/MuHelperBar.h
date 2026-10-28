@@ -52,6 +52,7 @@ namespace mu::ui::window
         // Set by the RmlUi document's data-event-click bindings; polled and cleared like other windows' RmlClickX().
         void RmlClickConfig() { m_bRmlConfigClicked = true; }
         void RmlClickToggle() { m_bRmlToggleClicked = true; }
+        void RmlClickMarket() { m_bRmlMarketClicked = true; }
 
     private:
         struct MuHelperBarRmlModel
@@ -61,6 +62,7 @@ namespace mu::ui::window
             Rml::String configHint;
             Rml::String startHint;
             Rml::String stopHint;
+            Rml::String marketHint;
         };
         void BindRmlModel(Rml::DataModelConstructor& c, MuHelperBarRmlModel& model);
         void OnRmlReloaded();
@@ -70,6 +72,7 @@ namespace mu::ui::window
 
         bool m_bRmlConfigClicked = false;
         bool m_bRmlToggleClicked = false;
+        bool m_bRmlMarketClicked = false;
 
         // The hovered button's hint (0 config, 1 start, 2 stop), in the shared tooltip.
 

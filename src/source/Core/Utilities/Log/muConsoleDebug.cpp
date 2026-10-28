@@ -29,6 +29,7 @@
 #include "UI/Core/WindowCommon.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/MuHelper/TestingHelperCommand.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "UI/HUD/ChatLogWindow.h"
 #include "UI/Core/SceneUICoordinator.h"
@@ -226,6 +227,7 @@ void ListDebugWindows()
 
 bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
 {
+    if (UI::Testing::HandleConsoleCommand(strCommand)) return true;
     if (Core::Benchmark::Console::HandleCommand(strCommand))
     {
         return true;

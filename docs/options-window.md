@@ -96,6 +96,9 @@ window writes to these sections:
     mount lean, stride matching, slope lean, foot placement or pose fades);
     see [`characters/animation-pipeline.md`](characters/animation-pipeline.md).
     It takes effect on the next frame, independently of Enhanced graphics.
+    Facing follows world clicks, including a held click; hovering alone does not
+    turn the character. Releasing the click lets an enhanced standing turn finish
+    toward its last clicked direction.
     Riding skeleton alignment and safe-zone mount fixes remain active when
     this option is unchecked.
   - `DisableEffects`, `DisableParticles`, `DisableSkillEffectModels`,

@@ -1,4 +1,12 @@
 mu_add_test(
+    NAME test_live_character_information
+    SOURCES
+        test_live_character_information.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
     NAME test_server_config_validation
     SOURCES
         test_server_config_validation.cpp

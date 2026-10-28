@@ -397,3 +397,16 @@ target_compile_definitions(rml_styling_regression_tests PRIVATE
     MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
     MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
 )
+
+mu_add_test(
+    NAME rml_testing_helper_tests
+    SOURCES
+        test_rml_testing_helper.cpp
+        RmlLayoutFixture.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
+    LINK_LIBS MuClient
+)
+target_compile_definitions(rml_testing_helper_tests PRIVATE
+    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
+    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
+)
