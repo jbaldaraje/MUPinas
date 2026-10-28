@@ -44,13 +44,19 @@ public class NewNpcsInScopePlugIn : INewNpcsInScopePlugIn
 
         if (npcs.Any())
         {
-            await connection.SendAsync(
-                () => WriteNpcsInScope(isSpawned, connection, npcs, this._player)).ConfigureAwait(false);
+            foreach (var batch in npcs.Chunk(byte.MaxValue))
+            {
+                await connection.SendAsync(
+                    () => WriteNpcsInScope(isSpawned, connection, batch, this._player)).ConfigureAwait(false);
+            }
         }
 
         if (summons.Any())
         {
-            await SummonedMonstersInScopeAsync(isSpawned, connection, summons).ConfigureAwait(false);
+            foreach (var batch in summons.Chunk(byte.MaxValue))
+            {
+                await SummonedMonstersInScopeAsync(isSpawned, connection, batch).ConfigureAwait(false);
+            }
         }
     }
 

@@ -43,12 +43,18 @@ public class NewNpcsInScopePlugIn095 : INewNpcsInScopePlugIn
         var npcs = newObjects.Except(summons).ToList();
         if (npcs.Any())
         {
-            await NpcsInScopeAsync(isSpawned, connection, npcs).ConfigureAwait(false);
+            foreach (var batch in npcs.Chunk(byte.MaxValue))
+            {
+                await NpcsInScopeAsync(isSpawned, connection, batch).ConfigureAwait(false);
+            }
         }
 
         if (summons.Any())
         {
-            await SummonedMonstersInScopeAsync(isSpawned, connection, summons).ConfigureAwait(false);
+            foreach (var batch in summons.Chunk(byte.MaxValue))
+            {
+                await SummonedMonstersInScopeAsync(isSpawned, connection, batch).ConfigureAwait(false);
+            }
         }
     }
 
