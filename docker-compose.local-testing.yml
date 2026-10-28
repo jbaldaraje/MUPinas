@@ -1,0 +1,23 @@
+# Use with docker-compose.yml and the private environment file described in docs/local-testing-macos.md.
+services:
+  openmu-startup:
+    image: ${OPENMU_TESTING_IMAGE:-mupinas/openmu:local-testing-20261028}
+    pull_policy: never
+    ports: !override
+      - "127.0.0.1:52407:8080"
+      - "45901:45901"
+      - "45902:45902"
+      - "45903:45903"
+      - "45904:45904"
+      - "45905:45905"
+      - "45906:45906"
+      - "44405:44405"
+      - "44406:44406"
+      - "45980:45980"
+    environment:
+      # The unauthenticated developer actor listener is for the isolated verification server only.
+      OPENMU_ACTOR_PORT: ""
+    volumes:
+      - ${OPENMU_LOCAL_CONFIG_DIR:?Set the private configuration directory}/appsettings.json:/app/appsettings.json:ro
+      - ${OPENMU_LOCAL_CONFIG_DIR:?Set the private configuration directory}/ConnectionSettings.xml:/app/ConnectionSettings.xml:ro
+      - ${OPENMU_LOCAL_LOG_DIR:?Set the persistent log directory}:/app/logs
