@@ -1,7 +1,7 @@
 # Use with docker-compose.yml and the private environment file described in docs/local-testing-macos.md.
 services:
   openmu-startup:
-    image: ${OPENMU_TESTING_IMAGE:-mupinas/openmu:local-testing-20261028}
+    image: ${OPENMU_TESTING_IMAGE:-mupinas/openmu:map-transition-20261028}
     pull_policy: never
     ports: !override
       - "127.0.0.1:52407:8080"

@@ -114,8 +114,10 @@ sh server/OpenMU-installed/docker/local-testing/build.sh
 sh scripts/run-local-testing-server.sh
 ```
 
-The build pins the original image digest and replaces only GameLogic and
-AttributeSystem DLL/PDB files. The wrapper uses the original Compose file plus
+The build pins the original image digest and replaces GameServer, GameLogic and
+AttributeSystem DLL/PDB files. The server now splits large NPC visibility updates
+into valid packets when entering populated maps such as Devias 2. The wrapper
+uses the original Compose file plus
 `docker-compose.local-testing.yml` and the ignored private environment file
 `out/staging/openmu-local-testing/live.private.env`. It preserves the database
 and keys volumes, mounts backed-up configuration read-only, and does not restart
