@@ -2833,6 +2833,15 @@ namespace MUnique.OpenMU.GameLogic.Properties {
                 return ResourceManager.GetString("ResetConfiguration_LevelAfterReset_Name", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Reset destination.
+        /// </summary>
+        public static string ResetConfiguration_Destination_Name {
+            get {
+                return ResourceManager.GetString("ResetConfiguration_Destination_Name", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Log out.
@@ -2849,6 +2858,33 @@ namespace MUnique.OpenMU.GameLogic.Properties {
         public static string ResetConfiguration_MoveHome_Name {
             get {
                 return ResourceManager.GetString("ResetConfiguration_MoveHome_Name", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Character&apos;s home map (legacy default).
+        /// </summary>
+        public static string ResetDestination_ClassHome_Name {
+            get {
+                return ResourceManager.GetString("ResetDestination_ClassHome_Name", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Return to Lorencia.
+        /// </summary>
+        public static string ResetDestination_Lorencia_Name {
+            get {
+                return ResourceManager.GetString("ResetDestination_Lorencia_Name", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Stay on the current map.
+        /// </summary>
+        public static string ResetDestination_StayOnCurrentMap_Name {
+            get {
+                return ResourceManager.GetString("ResetDestination_StayOnCurrentMap_Name", resourceCulture);
             }
         }
         

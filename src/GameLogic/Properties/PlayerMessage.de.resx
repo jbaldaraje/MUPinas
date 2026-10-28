@@ -654,6 +654,24 @@
   <data name="SelfDefenseDiminishesFormat" xml:space="preserve">
     <value>Die Selbstverteidigung von {0} gegen {1} lässt nach.</value>
   </data>
+  <data name="ResetAlreadyInProgress" xml:space="preserve">
+    <value>Ein Reset wird bereits verarbeitet.</value>
+  </data>
+  <data name="ResetCompleted" xml:space="preserve">
+    <value>Reset #{0} abgeschlossen.</value>
+  </data>
+  <data name="ResetDestinationUnavailable" xml:space="preserve">
+    <value>Das konfigurierte Resetziel ist nicht verfügbar.</value>
+  </data>
+  <data name="ResetInMiniGame" xml:space="preserve">
+    <value>Während eines Events oder Minispiels ist kein Reset möglich.</value>
+  </data>
+  <data name="ResetPositionInvalid" xml:space="preserve">
+    <value>Ein Reset ist von einer ungültigen Kartenposition aus nicht möglich.</value>
+  </data>
+  <data name="ResetWhileDead" xml:space="preserve">
+    <value>Im toten Zustand kannst du keinen Reset durchführen.</value>
+  </data>
   <data name="ResetNotEnabled" xml:space="preserve">
     <value>Reset ist nicht aktiviert.</value>
   </data>
@@ -1014,5 +1032,11 @@ Inventarerweiterungen: {18}</value>
   </data>
   <data name="MapIsNotActive" xml:space="preserve">
     <value>Diese Karte ist nicht verfügbar.</value>
+  </data>
+  <data name="MarketPlaceTravelNotAllowed" xml:space="preserve">
+    <value>Du kannst nur zwischen Lorencia und dem Loren-Markt reisen, wenn du am Leben und außerhalb von Events bist.</value>
+  </data>
+  <data name="MarketPlaceCloseStore" xml:space="preserve">
+    <value>Schließe deinen persönlichen Laden, bevor du den Markt-Warp benutzt.</value>
   </data>
 </root>

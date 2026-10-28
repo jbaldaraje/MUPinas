@@ -90,6 +90,23 @@ documented separately:
 
 * [Server-side AI bots](../server-features/bots.md)
 
+The **Reset Feature** configuration includes a **Reset destination** choice:
+return to Lorencia or stay on the current map and position. Existing
+configurations without this field keep their former **Move home** behavior
+through the **Character's home map** legacy default. Staying in place does not
+log the character out; the **Log out** option applies only to a map destination.
+Resets are rejected while the character is dead, trading, changing maps, or
+participating in a mini-game.
+
+## Loren Market shortcut
+
+The **Enter Loren Market** chat-command plugin provides `/market` to warp
+between Lorencia (map 0) and Loren Market (map 79). The client MU Helper bar
+also has an **M** shortcut which sends this command. The server validates the
+player state, source and destination maps, and a walkable destination spawn;
+the warp is rejected while dead, in an event, trading, or with a personal store
+open. This is a map-access shortcut, not an auction or global-listing system.
+
 ## Game event publisher
 
 The *Game Event Publisher* plugin publishes notable events of the game to the

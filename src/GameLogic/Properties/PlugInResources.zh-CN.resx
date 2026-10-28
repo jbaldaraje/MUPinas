@@ -1150,6 +1150,18 @@
   <data name="ResetConfiguration_MoveHome_Name" xml:space="preserve">
     <value>返回出生地</value>
   </data>
+  <data name="ResetConfiguration_Destination_Name" xml:space="preserve">
+    <value>转生后目的地</value>
+  </data>
+  <data name="ResetDestination_ClassHome_Name" xml:space="preserve">
+    <value>职业出生地图（旧版默认设置）</value>
+  </data>
+  <data name="ResetDestination_Lorencia_Name" xml:space="preserve">
+    <value>返回勇者大陆</value>
+  </data>
+  <data name="ResetDestination_StayOnCurrentMap_Name" xml:space="preserve">
+    <value>留在当前地图</value>
+  </data>
   <data name="ResetConfiguration_LogOut_Name" xml:space="preserve">
     <value>退出游戏</value>
   </data>

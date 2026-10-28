@@ -1221,6 +1221,18 @@
   <data name="ResetConfiguration_MoveHome_Name" xml:space="preserve">
     <value>Move home</value>
   </data>
+  <data name="ResetConfiguration_Destination_Name" xml:space="preserve">
+    <value>Reset destination</value>
+  </data>
+  <data name="ResetDestination_ClassHome_Name" xml:space="preserve">
+    <value>Character's home map (legacy default)</value>
+  </data>
+  <data name="ResetDestination_Lorencia_Name" xml:space="preserve">
+    <value>Return to Lorencia</value>
+  </data>
+  <data name="ResetDestination_StayOnCurrentMap_Name" xml:space="preserve">
+    <value>Stay on the current map</value>
+  </data>
   <data name="ResetConfiguration_LogOut_Name" xml:space="preserve">
     <value>Log out</value>
   </data>

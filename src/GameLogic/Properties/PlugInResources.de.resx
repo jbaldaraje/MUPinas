@@ -1203,6 +1203,18 @@
   <data name="ResetConfiguration_MoveHome_Name" xml:space="preserve">
     <value>Nach Hause versetzen</value>
   </data>
+  <data name="ResetConfiguration_Destination_Name" xml:space="preserve">
+    <value>Reset-Ziel</value>
+  </data>
+  <data name="ResetDestination_ClassHome_Name" xml:space="preserve">
+    <value>Heimatkarte der Klasse (bisheriger Standard)</value>
+  </data>
+  <data name="ResetDestination_Lorencia_Name" xml:space="preserve">
+    <value>Nach Lorencia zurückkehren</value>
+  </data>
+  <data name="ResetDestination_StayOnCurrentMap_Name" xml:space="preserve">
+    <value>Auf der aktuellen Karte bleiben</value>
+  </data>
   <data name="ResetConfiguration_LogOut_Name" xml:space="preserve">
     <value>Abmelden</value>
   </data>

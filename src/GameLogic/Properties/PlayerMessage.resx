@@ -657,6 +657,24 @@
   <data name="SelfDefenseDiminishesFormat" xml:space="preserve">
     <value>Self defense of {0} against {1} diminishes.</value>
   </data>
+  <data name="ResetAlreadyInProgress" xml:space="preserve">
+    <value>A reset is already being processed.</value>
+  </data>
+  <data name="ResetCompleted" xml:space="preserve">
+    <value>Reset #{0} completed.</value>
+  </data>
+  <data name="ResetDestinationUnavailable" xml:space="preserve">
+    <value>The configured reset destination is unavailable.</value>
+  </data>
+  <data name="ResetInMiniGame" xml:space="preserve">
+    <value>Reset is unavailable during an event or mini-game.</value>
+  </data>
+  <data name="ResetPositionInvalid" xml:space="preserve">
+    <value>Reset cannot be performed from an invalid map position.</value>
+  </data>
+  <data name="ResetWhileDead" xml:space="preserve">
+    <value>You cannot reset while dead.</value>
+  </data>
   <data name="ResetNotEnabled" xml:space="preserve">
     <value>Reset is not enabled.</value>
   </data>
@@ -1125,5 +1143,11 @@ Inventory Extensions: {18}</value>
   </data>
   <data name="MapIsNotActive" xml:space="preserve">
     <value>This map is not available.</value>
+  </data>
+  <data name="MarketPlaceTravelNotAllowed" xml:space="preserve">
+    <value>You can only travel between Lorencia and the Loren Market while alive and outside events.</value>
+  </data>
+  <data name="MarketPlaceCloseStore" xml:space="preserve">
+    <value>Close your personal store before using the market warp.</value>
   </data>
 </root>

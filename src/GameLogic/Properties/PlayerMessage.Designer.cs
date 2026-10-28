@@ -1569,6 +1569,24 @@ namespace MUnique.OpenMU.GameLogic.Properties {
                 return ResourceManager.GetString("MapIsNotActive", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to You can only travel between Lorencia and the Loren Market while alive and outside events..
+        /// </summary>
+        public static string MarketPlaceTravelNotAllowed {
+            get {
+                return ResourceManager.GetString("MarketPlaceTravelNotAllowed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Close your personal store before using the market warp..
+        /// </summary>
+        public static string MarketPlaceCloseStore {
+            get {
+                return ResourceManager.GetString("MarketPlaceCloseStore", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Map {0} not found..
@@ -2521,6 +2539,60 @@ namespace MUnique.OpenMU.GameLogic.Properties {
         public static string RequiredLevelForReset {
             get {
                 return ResourceManager.GetString("RequiredLevelForReset", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to A reset is already being processed..
+        /// </summary>
+        public static string ResetAlreadyInProgress {
+            get {
+                return ResourceManager.GetString("ResetAlreadyInProgress", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Reset #{0} completed..
+        /// </summary>
+        public static string ResetCompleted {
+            get {
+                return ResourceManager.GetString("ResetCompleted", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The configured reset destination is unavailable..
+        /// </summary>
+        public static string ResetDestinationUnavailable {
+            get {
+                return ResourceManager.GetString("ResetDestinationUnavailable", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Reset is unavailable during an event or mini-game..
+        /// </summary>
+        public static string ResetInMiniGame {
+            get {
+                return ResourceManager.GetString("ResetInMiniGame", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Reset cannot be performed from an invalid map position..
+        /// </summary>
+        public static string ResetPositionInvalid {
+            get {
+                return ResourceManager.GetString("ResetPositionInvalid", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to You cannot reset while dead..
+        /// </summary>
+        public static string ResetWhileDead {
+            get {
+                return ResourceManager.GetString("ResetWhileDead", resourceCulture);
             }
         }
         

@@ -12,6 +12,8 @@ using MUnique.OpenMU.DataModel.Configuration.Items;
 /// </summary>
 public class ResetConfiguration
 {
+    private ResetDestination? _destination;
+
     /// <summary>
     /// Gets or sets the reset limit, which is the maximum amount of possible resets.
     /// </summary>
@@ -97,7 +99,19 @@ public class ResetConfiguration
     /// Gets or sets a value indicating whether a reset moves the player home.
     /// </summary>
     [Display(ResourceType = typeof(PlugInResources), Name = nameof(PlugInResources.ResetConfiguration_MoveHome_Name))]
+    [ScaffoldColumn(false)]
     public bool MoveHome { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the destination after a reset. If not explicitly set, the legacy
+    /// <see cref="MoveHome"/> setting determines the destination.
+    /// </summary>
+    [Display(ResourceType = typeof(PlugInResources), Name = nameof(PlugInResources.ResetConfiguration_Destination_Name))]
+    public ResetDestination Destination
+    {
+        get => this._destination ?? (this.MoveHome ? ResetDestination.ClassHome : ResetDestination.StayOnCurrentMap);
+        set => this._destination = value;
+    }
 
     /// <summary>
     /// Gets or sets a value indicating whether a reset logs the player out back to character selection.

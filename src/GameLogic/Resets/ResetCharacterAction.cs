@@ -4,6 +4,9 @@
 
 namespace MUnique.OpenMU.GameLogic.Resets;
 
+using System.Runtime.CompilerServices;
+using System.Threading;
+using MUnique.OpenMU.DataModel.Configuration;
 using MUnique.OpenMU.GameLogic.Attributes;
 using MUnique.OpenMU.GameLogic.NPC;
 using MUnique.OpenMU.GameLogic.PlayerActions;
@@ -16,6 +19,8 @@ using MUnique.OpenMU.GameLogic.Views.NPC;
 /// </summary>
 public class ResetCharacterAction
 {
+    private static readonly ConditionalWeakTable<Player, SemaphoreSlim> ResetGates = new();
+
     private readonly Player _player;
     private readonly NonPlayerCharacter? _npc;
     private readonly LogoutAction _logoutAction = new();
@@ -36,6 +41,25 @@ public class ResetCharacterAction
     /// </summary>
     public async ValueTask ResetCharacterAsync()
     {
+        var resetGate = ResetGates.GetValue(this._player, static _ => new SemaphoreSlim(1, 1));
+        if (!await resetGate.WaitAsync(0).ConfigureAwait(false))
+        {
+            await this.ShowMessageAsync(nameof(PlayerMessage.ResetAlreadyInProgress)).ConfigureAwait(false);
+            return;
+        }
+
+        try
+        {
+            await this._player.RunPersistenceExclusiveAsync(this.ResetCharacterExclusiveAsync).ConfigureAwait(false);
+        }
+        finally
+        {
+            resetGate.Release();
+        }
+    }
+
+    private async ValueTask ResetCharacterExclusiveAsync()
+    {
         var resetFeature = this._player.GameContext.FeaturePlugIns.GetPlugIn<ResetFeaturePlugIn>();
         if (resetFeature is null)
         {
@@ -43,7 +67,9 @@ public class ResetCharacterAction
             return;
         }
 
-        if (this._player.PlayerState.CurrentState != PlayerState.EnteredWorld && this._npc is null)
+        var currentState = this._player.PlayerState.CurrentState;
+        if (currentState != PlayerState.EnteredWorld
+            && !(this._npc is not null && currentState == PlayerState.NpcDialogOpened))
         {
             await this.ShowMessageAsync(nameof(PlayerMessage.CantResetWithOpenedWindows)).ConfigureAwait(false);
             return;
@@ -55,10 +81,48 @@ public class ResetCharacterAction
             return;
         }
 
+        if (!this._player.IsAlive)
+        {
+            await this.ShowMessageAsync(nameof(PlayerMessage.ResetWhileDead)).ConfigureAwait(false);
+            return;
+        }
+
+        if (this._player.CurrentMiniGame is not null)
+        {
+            await this.ShowMessageAsync(nameof(PlayerMessage.ResetInMiniGame)).ConfigureAwait(false);
+            return;
+        }
+
+        var currentMap = this._player.CurrentMap;
+        var currentPosition = this._player.Position;
+        if (currentMap is null
+            || currentMap.IsTornDown
+            || !currentMap.Terrain.WalkMap[currentPosition.X, currentPosition.Y])
+        {
+            await this.ShowMessageAsync(nameof(PlayerMessage.ResetPositionInvalid)).ConfigureAwait(false);
+            return;
+        }
+
         var configuration = resetFeature.Configuration;
         if (configuration is null)
         {
             await this.ShowMessageAsync(nameof(PlayerMessage.ResetNotConfigured)).ConfigureAwait(false);
+            return;
+        }
+
+        var destination = configuration.Destination;
+        if (!Enum.IsDefined(typeof(ResetDestination), destination))
+        {
+            await this.ShowMessageAsync(nameof(PlayerMessage.ResetDestinationUnavailable)).ConfigureAwait(false);
+            return;
+        }
+
+        var destinationGate = destination == ResetDestination.StayOnCurrentMap
+            ? null
+            : await this.GetDestinationSpawnGateAsync(destination).ConfigureAwait(false);
+        if (destination != ResetDestination.StayOnCurrentMap && destinationGate is null)
+        {
+            await this.ShowMessageAsync(nameof(PlayerMessage.ResetDestinationUnavailable)).ConfigureAwait(false);
             return;
         }
 
@@ -85,18 +149,25 @@ public class ResetCharacterAction
         this._player.Attributes[Stats.Level] = configuration.LevelAfterReset;
         this._player.SelectedCharacter.Experience = 0;
         this.UpdateStats(configuration, resetProgression);
-        if (configuration.MoveHome)
+
+        if (destination != ResetDestination.StayOnCurrentMap && configuration.LogOut)
         {
-            await this.MoveHomeAsync().ConfigureAwait(false);
+            this.PlaceCharacterAtGate(destinationGate!);
         }
 
-        if (configuration.LogOut)
+        await this.ShowMessageAsync(nameof(PlayerMessage.ResetCompleted), resetProgression.NextResetCount).ConfigureAwait(false);
+
+        if (destination != ResetDestination.StayOnCurrentMap && configuration.LogOut)
         {
             await this._logoutAction.LogoutAsync(this._player, LogoutType.BackToCharacterSelection).ConfigureAwait(false);
         }
         else
         {
             await this.UpdateClientStatsAsync(configuration).ConfigureAwait(false);
+            if (destination != ResetDestination.StayOnCurrentMap)
+            {
+                await this._player.WarpToAsync(destinationGate!).ConfigureAwait(false);
+            }
         }
     }
 
@@ -196,17 +267,64 @@ public class ResetCharacterAction
         }
     }
 
-    private async ValueTask MoveHomeAsync()
+    private async ValueTask<ExitGate?> GetDestinationSpawnGateAsync(ResetDestination destination)
     {
-        var homeMapDef = this._player.SelectedCharacter!.CharacterClass!.HomeMap;
-        if (homeMapDef is { }
-            && await this._player.GameContext.GetMapAsync((ushort)homeMapDef.Number).ConfigureAwait(false) is { SafeZoneSpawnGate: { } spawnGate })
+        var selectedCharacter = this._player.SelectedCharacter!;
+        var destinationMapNumber = destination switch
         {
-            this._player.SelectedCharacter.PositionX = (byte)Rand.NextInt(spawnGate.X1, spawnGate.X2);
-            this._player.SelectedCharacter.PositionY = (byte)Rand.NextInt(spawnGate.Y1, spawnGate.Y2);
-            this._player.SelectedCharacter.CurrentMap = spawnGate.Map;
-            this._player.Rotation = spawnGate.Direction;
+            ResetDestination.ClassHome => selectedCharacter.CharacterClass?.HomeMap?.Number,
+            ResetDestination.Lorencia => (short)0,
+            _ => null,
+        };
+        if (destinationMapNumber is not { } mapNumber || mapNumber < 0)
+        {
+            return null;
         }
+
+        var destinationMap = await this._player.GameContext.GetMapAsync((ushort)mapNumber).ConfigureAwait(false);
+        if (destinationMap is null
+            || destinationMap.MapId != mapNumber
+            || !destinationMap.Definition.IsActive)
+        {
+            return null;
+        }
+
+        var spawnGate = destinationMap.SafeZoneSpawnGate ?? destinationMap.Definition.GetSafezoneGate(destinationMap.Terrain);
+        if (spawnGate is null)
+        {
+            return null;
+        }
+
+        var spawnMap = spawnGate.Map;
+        if (spawnMap is null || !spawnMap.IsActive || spawnMap.Number != mapNumber)
+        {
+            return null;
+        }
+
+        var walkablePoint = destinationMap.Terrain.GetWalkableCoordinate(spawnGate);
+        if (walkablePoint is not { } point)
+        {
+            return null;
+        }
+
+        return new ExitGate
+        {
+            Map = destinationMap.Definition,
+            X1 = point.X,
+            X2 = point.X,
+            Y1 = point.Y,
+            Y2 = point.Y,
+            Direction = spawnGate.Direction,
+        };
+    }
+
+    private void PlaceCharacterAtGate(ExitGate gate)
+    {
+        var character = this._player.SelectedCharacter!;
+        character.PositionX = gate.X1;
+        character.PositionY = gate.Y1;
+        character.CurrentMap = gate.Map;
+        this._player.Rotation = gate.Direction;
     }
 
     private async ValueTask UpdateClientStatsAsync(ResetConfiguration configuration)
