@@ -7,6 +7,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "World/MapInfra/MapManager.h"
 #include "MUHelper/MuHelper.h"
+#include "Network/Server/WSclient.h"
 
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
@@ -64,11 +65,14 @@ void CMuHelperBar::BindRmlModel(Rml::DataModelConstructor& c, MuHelperBarRmlMode
     c.Bind("config_hint", &model.configHint);
     c.Bind("start_hint", &model.startHint);
     c.Bind("stop_hint", &model.stopHint);
+    c.Bind("market_hint", &model.marketHint);
 
     c.BindEventCallback("mu_helper_config_click",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickConfig(); });
     c.BindEventCallback("mu_helper_toggle_click",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickToggle(); });
+    c.BindEventCallback("mu_helper_market_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickMarket(); });
 }
 
 void CMuHelperBar::OnRmlReloaded()
@@ -122,6 +126,16 @@ bool CMuHelperBar::Update()
         MUHelper::g_MuHelper.Toggle();
         PlayBuffer(SOUND_CLICK01);
     }
+    else if (m_bRmlMarketClicked)
+    {
+        m_bRmlMarketClicked = false;
+        if (Hero != NULL && SocketClient != NULL)
+        {
+            const std::wstring command = L"/market";
+            SocketClient->ToGameServer()->SendPublicChatMessage(MU_C16(Hero->ID), MU_C16(command.c_str()));
+            PlayBuffer(SOUND_CLICK01);
+        }
+    }
 
     if ((IsVisible() == true) && (Hero != NULL))
     {
@@ -168,6 +182,8 @@ void CMuHelperBar::SyncRmlModel()
               StringUtils::WideToNarrow(I18N::Game::StartOfficialMUHelper));
     SyncField(m_RmlView.Binder(), &MuHelperBarRmlModel::stopHint, "stop_hint",
               StringUtils::WideToNarrow(I18N::Game::StopOfficialMUHelper));
+    SyncField(m_RmlView.Binder(), &MuHelperBarRmlModel::marketHint, "market_hint",
+              Rml::String("Loren Market (/market)"));
 }
 
 float CMuHelperBar::GetLayerDepth()

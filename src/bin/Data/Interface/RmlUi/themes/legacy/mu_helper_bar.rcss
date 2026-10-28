@@ -113,6 +113,17 @@
 #btn_config:hover { decorator: image(muhelper-config-hover); }
 #btn_start:hover { decorator: image(muhelper-start-hover); }
 #btn_stop:hover { decorator: image(muhelper-stop-hover); }
+#btn_market {
+	left: 189dp;
+	padding: 0dp;
+	background-color: transparent;
+	border: 0dp transparent;
+	color: token(text-primary);
+	font-family: "token(font-body)";
+	font-size: 9dp;
+	line-height: 13dp;
+	text-align: center;
+}
 
 .dot {
 	display: none;

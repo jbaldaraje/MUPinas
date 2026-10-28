@@ -50,6 +50,15 @@
 #btn_config { left: 153dp; }
 #btn_start  { left: 171dp; }
 #btn_stop   { left: 171dp; }
+#btn_market {
+	left: 189dp;
+	padding: 0dp;
+	color: token(text-primary);
+	font-family: "token(font-body)";
+	font-size: 9dp;
+	line-height: 11dp;
+	text-align: center;
+}
 
 /* Plain colored dot per button (no icon art) -- config: neutral, start: success, stop: danger. */
 .dot {

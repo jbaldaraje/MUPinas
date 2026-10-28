@@ -24,6 +24,8 @@
 		     data-attr-data-hint="stop_hint">
 			<div class="dot"></div>
 		</div>
+		<button id="btn_market" class="mu-btn" type="button" aria-label="Loren Market"
+		        data-event-click="mu_helper_market_click" data-attr-data-hint="market_hint">M</button>
 	</div>
 </body>
 </rml>
