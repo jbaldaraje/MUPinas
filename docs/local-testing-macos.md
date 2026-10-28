@@ -68,6 +68,11 @@ concurrent edits and was preserved. The compatible implementation is in
 The main MUPinas checkout links that exact server commit as a submodule; clone
 with `--recurse-submodules` or run `git submodule update --init` to obtain it.
 The server source history is on the `codex/openmu-server` branch of MUPinas.
+The SDL submodule points to MUPinas branch `codex/sdl-metal-support`, which
+contains the local Metal texture upload correction used by this macOS build.
+The other coding session's unfinished server edits were preserved on the
+`codex/openmu-concurrent-snapshot` branch. That snapshot is separate from the
+tested live server commit.
 
 Installed OpenMU already supplied reset rules, plugin configuration and admin
 forms, experience/drop pipelines, bot generation, map warps and personal shops.
