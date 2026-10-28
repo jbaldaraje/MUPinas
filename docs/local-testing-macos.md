@@ -65,6 +65,9 @@ The running server image was matched against OpenMU source commit
 matched** its portable PDBs. The newer checkout at `server/OpenMU` had unrelated
 concurrent edits and was preserved. The compatible implementation is in
 `server/OpenMU-installed`, branch `codex/local-testing-installed`.
+The main MUPinas checkout links that exact server commit as a submodule; clone
+with `--recurse-submodules` or run `git submodule update --init` to obtain it.
+The server source history is on the `codex/openmu-server` branch of MUPinas.
 
 Installed OpenMU already supplied reset rules, plugin configuration and admin
 forms, experience/drop pipelines, bot generation, map warps and personal shops.

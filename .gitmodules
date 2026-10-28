@@ -8,3 +8,7 @@
 	path = src/ThirdParty/RmlUi
 	url = https://github.com/nitoygo/RmlUi.git
 	branch = integration/sdl-gpu-parity
+[submodule "server/OpenMU-installed"]
+	path = server/OpenMU-installed
+	url = https://github.com/jbaldaraje/MUPinas.git
+	branch = codex/openmu-server
