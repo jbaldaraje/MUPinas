@@ -31,22 +31,16 @@ public class StatAttribute : BaseStatAttribute
     }
 
     /// <summary>
-    /// Gets or sets the value.
+    /// Gets or sets the stored, uncapped value used by persistence.
     /// </summary>
+    /// <remarks>Read through <see cref="IAttribute"/> for the effective capped value. Keeping the
+    /// persisted getter raw prevents a temporary cap from overwriting earned stats during a save.</remarks>
     /// <value>
     /// The value.
     /// </value>
     public new virtual float Value
     {
-        get
-        {
-            if (this.Definition?.MaximumValue is { } maxValue)
-            {
-                return Math.Min(maxValue, this._statValue);
-            }
-
-            return this._statValue;
-        }
+        get => this._statValue;
 
         set
         {

@@ -24,7 +24,9 @@ public abstract class BaseStatAttribute : BaseAttribute
     }
 
     /// <inheritdoc/>
-    public override float Value => this.ValueGetter;
+    public override float Value => this.Definition?.MaximumValue is { } maximum
+        ? Math.Min(maximum, this.ValueGetter)
+        : this.ValueGetter;
 
     /// <summary>
     /// Gets the value.

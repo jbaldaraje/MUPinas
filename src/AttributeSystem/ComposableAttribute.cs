@@ -61,7 +61,14 @@ public class ComposableAttribute : BaseAttribute, IComposableAttribute
     public IEnumerable<IElement> Elements => this._elements;
 
     /// <inheritdoc/>
-    public override float Value => this._cachedValue ?? this.GetAndCacheValue();
+    public override float Value
+    {
+        get
+        {
+            var value = this._cachedValue ?? this.GetAndCacheValue();
+            return this.Definition.MaximumValue is { } maximum ? Math.Min(maximum, value) : value;
+        }
+    }
 
     /// <inheritdoc/>
     public IComposableAttribute AddElement(IElement element)
@@ -105,6 +112,9 @@ public class ComposableAttribute : BaseAttribute, IComposableAttribute
         }
     }
 
+    /// <summary>Invalidates cached relationships after an administrator changes definition limits.</summary>
+    public void Invalidate() => this.ElementChanged(this, EventArgs.Empty);
+
     private float GetAndCacheValue()
     {
         // Aggregate a copy-on-write snapshot, so a concurrent AddElement/RemoveElement (e.g. an expiring
@@ -134,6 +144,21 @@ public class ComposableAttribute : BaseAttribute, IComposableAttribute
             return 0;
         }
 
+        var newValue = this.AggregateSnapshot(elements);
+
+        lock (this._elementLock)
+        {
+            if (this._version == versionAtStart)
+            {
+                this._cachedValue = newValue;
+            }
+        }
+
+        return newValue;
+    }
+
+    private float AggregateSnapshot(IElement[] elements)
+    {
         var rawValues = elements.Where(e => e.AggregateType == AggregateType.AddRaw).Sum(e => e.Value);
         var multiValues = elements.Where(e => e.AggregateType == AggregateType.Multiplicate).Select(e => e.Value).Concat(Enumerable.Repeat(1.0F, 1)).Aggregate((a, b) => a * b);
         var finalValues = elements.Where(e => e.AggregateType == AggregateType.AddFinal).Sum(e => e.Value);
@@ -149,19 +174,6 @@ public class ComposableAttribute : BaseAttribute, IComposableAttribute
         if (this._maximumValue.HasValue)
         {
             newValue = Math.Min(this._maximumValue.Value, newValue);
-        }
-
-        if (this.Definition.MaximumValue.HasValue)
-        {
-            newValue = Math.Min(this.Definition.MaximumValue.Value, newValue);
-        }
-
-        lock (this._elementLock)
-        {
-            if (this._version == versionAtStart)
-            {
-                this._cachedValue = newValue;
-            }
         }
 
         return newValue;
