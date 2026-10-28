@@ -169,10 +169,11 @@ dump over current player progress for an ordinary feature rollback.
 - **Stat safety:** a synthetic character retained raw Strength 128226,
   Vitality 120020 and Energy 65918 after cap changes, save and reconnect;
   effective health changed with caps 32000/65535.
-- **Spots:** all 17 eligible maps were activated in stages on live game server 0.
-  Fifteen fit 150 each; Icarus fits 105 and Kanturu III 63 at the safe default
-  spacing: **2418 owned monsters**. Shortfalls are reported. Repeat application
-  and cleanup were checked on the isolated database.
+- **Spots:** all 17 eligible maps were activated in stages on live game server 0
+  during the earlier 150-monster test. Fifteen fit 150 each; Icarus fit 105 and
+  Kanturu III 63: **2418 owned monsters**. The current default is 30 per map,
+  or 510 when all eligible maps are selected. Shortfalls are reported. Repeat
+  application and cleanup were checked on the isolated database.
 - **Crowds:** actual 10/25/50/100 simulated entities and seven class families
   were verified, including expiry and cleanup. Live crowd target is zero.
   These are server-side simulations, not 100 connected clients. Reusable IsBot
