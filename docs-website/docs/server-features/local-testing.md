@@ -25,7 +25,7 @@ snapshot persist in the existing plugin configuration.
 | MaximumAttackSpeed | 800, attack **and magic** speed cap, editable 1–65535 |
 | MaximumStat | 65535, five base and total stat caps, editable 1–65535 |
 | EligibleMaps | `0,1,2,3,4,7,8,10,33,37,38,51,56,57,63,80,81` |
-| MonstersPerMap / MonstersPerSpot | 150 / 3, bounded to 100–200 / 2–3 |
+| MonstersPerMap / MonstersPerSpot | 30 / 3, bounded to 30–200 / 2–3 |
 | SpotSpacing / RespawnSeconds | 12 tiles / 3 seconds |
 | ActiveMonsterMaps | Empty until applied, selected map numbers |
 | GlobalMonsterLimit | 3000 across the process's game servers |
@@ -85,8 +85,8 @@ Natural spawn lists remain unchanged. Reapplication retains owned populations;
 changed parameters replace only those owned populations. Cleanup cancels their
 respawns. Requested, allocated and alive counts are distinct during deaths.
 
-The installed terrain at default spacing fits 150 on fifteen maps, 105 on
-Icarus and 63 on Kanturu III: 2418 total. Different terrain can change this.
+The installed terrain at default spacing fits 30 on all seventeen eligible maps:
+510 owned monsters when all are selected. Different terrain can change this.
 The memory ceiling pauses later stages without deleting natural entities.
 **Stop** disables the preset, restores its baseline and removes owned entities.
 
@@ -150,7 +150,7 @@ unsaved edits. Unpatched servers time out instead of showing invented results.
 /localtest enabled 1
 /localtest caps 800 65535
 /localtest rates 10000 1000
-/localtest spots 150 3 3 12
+/localtest spots 30 3 3 12
 /localtest preview all
 /localtest apply all
 /localtest cleanup all

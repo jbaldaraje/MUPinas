@@ -15,6 +15,7 @@ using Model = MUnique.OpenMU.Persistence.BasicModel;
 public class LocalTestingPresetTests
 {
     /// <summary>Custom targets must never create a lone monster outside a two- or three-monster spot.</summary>
+    [TestCase(30, 3, 30)]
     [TestCase(100, 3, 100)]
     [TestCase(101, 2, 100)]
     [TestCase(151, 3, 151)]
@@ -98,8 +99,8 @@ public class LocalTestingPresetTests
         var second = TestingSpawnPlanner.Preview(map, settings);
         Assert.Multiple(() =>
         {
-            Assert.That(first.Positions, Has.Count.EqualTo(150));
-            Assert.That(first.Positions.Distinct().Count(), Is.EqualTo(150));
+            Assert.That(first.Positions, Has.Count.EqualTo(30));
+            Assert.That(first.Positions.Distinct().Count(), Is.EqualTo(30));
             Assert.That(second.Positions, Is.EqualTo(first.Positions));
             Assert.That(first.Positions.Any(p => p.X >= 88 && p.X <= 132 && p.Y >= 88 && p.Y <= 132), Is.False);
             Assert.That(first.Positions.Any(p => p.X >= 54 && p.X <= 71 && p.Y >= 54 && p.Y <= 71), Is.False);

@@ -12,4 +12,4 @@ for ASSEMBLY in MUnique.OpenMU.GameServer MUnique.OpenMU.GameLogic MUnique.OpenM
     cp "$SOURCE_DIR/bin/Release/$ASSEMBLY.dll" "$STAGE_DIR/assemblies/"
     cp "$SOURCE_DIR/bin/Release/$ASSEMBLY.pdb" "$STAGE_DIR/assemblies/"
 done
-docker build -f "$SCRIPT_DIR/Dockerfile" -t "${OPENMU_TESTING_IMAGE:-mupinas/openmu:map-transition-20261028}" "$STAGE_DIR"
+docker build -f "$SCRIPT_DIR/Dockerfile" -t "${OPENMU_TESTING_IMAGE:-mupinas/openmu:monster-default-30-20261028}" "$STAGE_DIR"

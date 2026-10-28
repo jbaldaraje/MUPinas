@@ -32,8 +32,8 @@ public sealed class LocalTestingConfiguration
     public string EligibleMaps { get; set; } = "0,1,2,3,4,7,8,10,33,37,38,51,56,57,63,80,81";
 
     /// <summary>Gets or sets the target number of generated monsters on a map.</summary>
-    [Range(100, 200)]
-    public int MonstersPerMap { get; set; } = 150;
+    [Range(30, 200)]
+    public int MonstersPerMap { get; set; } = 30;
 
     /// <summary>Gets or sets the number of monsters grouped in each spot.</summary>
     [Range(2, 3)]
