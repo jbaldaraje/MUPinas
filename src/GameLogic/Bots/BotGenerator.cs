@@ -45,17 +45,22 @@ internal sealed class BotGenerator
 
     private readonly IGameContext _gameContext;
     private readonly ILogger _logger;
-    private readonly BotNameGenerator _nameGenerator = new();
+    private readonly BotNameGenerator _nameGenerator;
+    private readonly string _loginPrefix;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BotGenerator"/> class.
     /// </summary>
     /// <param name="gameContext">The game context.</param>
     /// <param name="logger">The logger.</param>
-    public BotGenerator(IGameContext gameContext, ILogger logger)
+    /// <param name="loginPrefix">The isolated account namespace; the existing population retains its default.</param>
+    /// <param name="testingNames">Whether visible names identify a test crowd.</param>
+    public BotGenerator(IGameContext gameContext, ILogger logger, string loginPrefix = LoginPrefix, bool testingNames = false)
     {
         this._gameContext = gameContext;
         this._logger = logger;
+        this._loginPrefix = loginPrefix;
+        this._nameGenerator = new BotNameGenerator(testingNames ? "Test" : string.Empty);
     }
 
     /// <summary>
@@ -147,10 +152,15 @@ internal sealed class BotGenerator
         for (var i = 1; i <= numberOfAccounts; i++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var loginName = GetLoginName(i);
+            var loginName = $"{this._loginPrefix}{i:D4}";
             var existing = await context.GetAccountByLoginNameAsync(loginName, cancellationToken).ConfigureAwait(false);
             if (existing is not null)
             {
+                if (this._loginPrefix != LoginPrefix && !existing.IsBot)
+                {
+                    throw new InvalidOperationException("A non-bot account occupies the test namespace; it was not modified.");
+                }
+
                 buffersAssigned += existing.Characters.Count(c => BotBuild.IsSupportElf(c.CharacterClass, c.Name));
 
                 // Skip the slots this account drew when it was created, so new

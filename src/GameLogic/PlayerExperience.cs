@@ -95,15 +95,15 @@ internal sealed class PlayerExperience
         var maxMultiplier = attributes[Stats.RandomExperienceMaxMultiplier];
         if (minMultiplier > 0 && maxMultiplier > 0)
         {
-            var minimumExperience = (int)(experience * minMultiplier);
-            var maximumExperience = (int)(experience * maxMultiplier);
+            var minimumExperience = LocalTesting.TestingRateMath.Experience(experience * minMultiplier);
+            var maximumExperience = LocalTesting.TestingRateMath.Experience(experience * maxMultiplier);
             if (minimumExperience < maximumExperience)
             {
                 return Rand.NextInt(minimumExperience, maximumExperience);
             }
         }
 
-        return (int)experience;
+        return LocalTesting.TestingRateMath.Experience(experience);
     }
 
     /// <summary>

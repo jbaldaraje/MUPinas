@@ -39,7 +39,15 @@ internal sealed class BotNameGenerator
         "ana", "ella", "ix", "ael", "oth", "ara", "une", "is", "ius", "wen",
     };
 
+    private readonly string _prefix;
     private readonly IRandomizer _randomizer = Rand.GetRandomizer();
+
+    /// <summary>Initializes a new instance of the <see cref="BotNameGenerator"/> class.</summary>
+    /// <param name="prefix">An optional visible testing prefix, retained within the client name limit.</param>
+    public BotNameGenerator(string prefix = "")
+    {
+        this._prefix = prefix;
+    }
 
     /// <summary>
     /// Generates a name which is not yet used, neither within this run nor in the database.
@@ -87,6 +95,7 @@ internal sealed class BotNameGenerator
             name = name[..10];
         }
 
-        return char.ToUpperInvariant(name[0]) + name[1..].ToLowerInvariant();
+        var formatted = char.ToUpperInvariant(name[0]) + name[1..].ToLowerInvariant();
+        return this._prefix + formatted[..Math.Min(formatted.Length, 10 - this._prefix.Length)];
     }
 }

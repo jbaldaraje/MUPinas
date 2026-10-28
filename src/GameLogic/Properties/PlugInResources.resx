@@ -1613,4 +1613,22 @@
   <data name="GameEventPublisherConfiguration_PublishAncientItemDrops_Name" xml:space="preserve">
     <value>Publish ancient item drops</value>
   </data>
+  <data name="LocalTestingFeature_Name" xml:space="preserve"><value>macOS local testing preset</value></data>
+  <data name="LocalTestingFeature_Description" xml:space="preserve"><value>Reversible normal experience, ordinary drops, character caps and owned testing populations. Keep the plugin active; set Enabled to false to restore the saved baseline.</value></data>
+  <data name="LocalTestingCommand_Name" xml:space="preserve"><value>Local testing controls</value></data>
+  <data name="LocalTestingCommand_Description" xml:space="preserve"><value>Read testing status; game masters can save bounded preset settings and manage owned test populations.</value></data>
+  <data name="ResetConfiguration_Destination_Name" xml:space="preserve">
+    <value>Reset destination</value>
+  </data>
+  <data name="ResetDestination_ClassHome_Name" xml:space="preserve">
+    <value>Character's home map (legacy default)</value>
+  </data>
+  <data name="ResetDestination_Lorencia_Name" xml:space="preserve">
+    <value>Return to Lorencia</value>
+  </data>
+  <data name="ResetDestination_StayOnCurrentMap_Name" xml:space="preserve">
+    <value>Stay on the current map</value>
+  </data>
+  <data name="MarketCommand_Name" xml:space="preserve"><value>Enter Loren Market</value></data>
+  <data name="MarketCommand_Description" xml:space="preserve"><value>Travel between Lorencia and Loren Market using /market.</value></data>
 </root>

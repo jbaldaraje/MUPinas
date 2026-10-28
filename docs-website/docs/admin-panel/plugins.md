@@ -44,6 +44,10 @@ change anything, so you can turn it back on.
 
 ## Plugin configuration
 
+The opt-in **macOS local testing preset** provides editable rates, speed/stat
+caps, bounded spots and crowds. See [Local testing](../server-features/local-testing.md)
+for controls, permissions, measurements and restoration.
+
 Plugins with their own configuration have a ⚙ button which opens it. The
 configuration is stored per plugin and, where applicable, per client version, so
 the same plugin can behave differently for different clients.

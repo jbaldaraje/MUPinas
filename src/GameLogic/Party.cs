@@ -358,17 +358,17 @@ public sealed class Party : AsyncDisposable
     {
         if (randomMinMultiplier <= 0 || randomMaxMultiplier <= 0)
         {
-            return (int)totalBaseExperience;
+            return LocalTesting.TestingRateMath.Experience(totalBaseExperience);
         }
 
-        var minimumExperience = (int)(totalBaseExperience * randomMinMultiplier);
-        var maximumExperience = (int)(totalBaseExperience * randomMaxMultiplier);
+        var minimumExperience = LocalTesting.TestingRateMath.Experience(totalBaseExperience * randomMinMultiplier);
+        var maximumExperience = LocalTesting.TestingRateMath.Experience(totalBaseExperience * randomMaxMultiplier);
         if (minimumExperience < maximumExperience)
         {
             return Rand.NextInt(minimumExperience, maximumExperience);
         }
 
-        return (int)totalBaseExperience;
+        return LocalTesting.TestingRateMath.Experience(totalBaseExperience);
     }
 
     private static async ValueTask<int> AwardExperienceAsync(Player player, float perLevel, IAttackable killed)
