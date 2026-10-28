@@ -68,8 +68,8 @@
 #include "Scenes/SceneCommon.h"
 #include "Render/Text/CUIRenderText.h"
 #include "Engine/Object/EnhancedMovement.h"
-#include "Engine/Object/Movement/FrameTime.h"
 #include "Engine/Object/Movement/FlightFeel.h"
+#include "Engine/Object/Movement/HeroCursorTurn.h"
 #include "Engine/Object/Movement/HeroLook.h"
 #include "Engine/Object/Movement/Momentum.h"
 #include "Engine/Object/Movement/SlopeLean.h"
@@ -2009,12 +2009,7 @@ int StandTime = 0;
 
 namespace
 {
-// The standing hero turns to face the cursor when it stays this far from where he faces (past what the head and
-// shoulders follow) for this long, stepping around (StartStandingTurn); a passing cursor turns only the head.
-constexpr float CursorTurnDegrees = 90.f;
-constexpr float CursorTurnDelaySeconds = 0.5f;
-float s_cursorAwaySeconds = 0.f;
-// A turn toward the cursor is under way: it follows the cursor, and the server hears the new facing when it ends.
+// A click-directed standing turn is under way; the server hears its facing when it ends.
 bool s_turningToCursor = false;
 } // namespace
 
@@ -2936,61 +2931,35 @@ void FillAddFriendName()
 
 namespace
 {
-// The standing hero turning toward the cursor: the head follows the cursor up to its limit; the body turns only when
-// the cursor stays well behind that, stepping around (it used to snap to the cursor's eighth of the circle every 40
-// frames: SnapToCursor).
-void TurnToCursor(CHARACTER* c, int heroX, int heroY, bool lookAtMouse)
+// The same world-pointer gate as movement input; window and HUD clicks never steer the hero.
+bool WorldPointerAvailable()
+{
+    return !MouseOnWindow && !g_pNewUISystem->CheckMouseUse() && !Core::Input::IsMouseOverUI();
+}
+
+void TurnToCursor(CHARACTER* c, int heroX, int heroY, bool lookAtMouse, bool worldClick)
 {
     OBJECT* o = &c->Object;
     const bool mayTurn =
-        !MouseOnWindow && Hero->Dead == 0 && lookAtMouse && o->CurrentAction != PLAYER_POSE1 &&
+        c->Dead == 0 && lookAtMouse && o->CurrentAction != PLAYER_POSE1 &&
         o->CurrentAction != PLAYER_POSE_FEMALE1 && o->CurrentAction != PLAYER_SIT1 &&
         o->CurrentAction != PLAYER_SIT_FEMALE1 && o->CurrentAction != PLAYER_ATTACK_TELEPORT &&
         o->CurrentAction != PLAYER_ATTACK_RIDE_TELEPORT && o->CurrentAction != PLAYER_FENRIR_ATTACK_DARKLORD_TELEPORT &&
         o->CurrentAction != PLAYER_SKILL_ATT_UP_OURFORCES && o->CurrentAction != PLAYER_SKILL_HP_UP_OURFORCES &&
-        o->CurrentAction != PLAYER_ATTACK_SKILL_SWORD2 && Hero->AttackTime == 0;
-    // The cursor's direction, only when it can matter. CreateAngle's arguments are swapped vs the head's aim
-    // above and the result negated, so the camera's yaw enters with the opposite sign.
-    float cursorAngle = 0.f;
-    if (mayTurn || s_turningToCursor)
+        o->CurrentAction != PLAYER_ATTACK_SKILL_SWORD2 && c->AttackTime == 0;
+    float clickedAngle = 0.f;
+    if (mayTurn && worldClick)
     {
-        cursorAngle =
+        // Swapped arguments and negation rotate the click into world space using the camera yaw.
+        clickedAngle =
             -(CreateAngle((float)MouseX, (float)MouseY, (float)heroX, (float)heroY) + g_Camera.Angle[2]) + 360.f;
-        cursorAngle = std::fmod(cursorAngle, 360.f);
+        clickedAngle = std::fmod(clickedAngle, 360.f);
     }
-    if (s_turningToCursor)
-    {
-        if (c->TurnPending && mayTurn)
-        {
-            c->MoveHeading = cursorAngle;
-        }
-        else
-        {
-            // Done (or cut short by an attack, a sit, a window): the others see where he faces now.
-            s_turningToCursor = false;
-            if (!c->TurnPending)
-            {
-                SendRequestAction(Hero->Object, AT_STAND1);
-            }
-        }
-    }
-    else if (mayTurn && FarAngle(o->Angle[2], cursorAngle) > CursorTurnDegrees)
-    {
-        s_cursorAwaySeconds += Engine::Characters::FrameSeconds();
-        if (s_cursorAwaySeconds >= CursorTurnDelaySeconds)
-        {
-            s_cursorAwaySeconds = 0.f;
-            StartStandingTurn(c, cursorAngle);
-            s_turningToCursor = c->TurnPending;
-        }
-    }
-    else
-    {
-        s_cursorAwaySeconds = 0.f;
-    }
+    if (Engine::Characters::UpdateHeroCursorTurn(c, s_turningToCursor, mayTurn, worldClick, clickedAngle))
+        SendRequestAction(c->Object, AT_STAND1);
 }
 
-// Without Enhanced Movement, as before: every 40 frames the standing hero snaps to the cursor's eighth of the circle.
+// Without Enhanced Movement, retain the legacy snap and cadence, requiring a world click too.
 void SnapToCursor(CHARACTER* c, int heroX, int heroY, bool lookAtMouse)
 {
     OBJECT* o = &c->Object;
@@ -3121,7 +3090,10 @@ void MoveHero()
     // Someone to look at, or an idle glance (Enhanced Movement), comes before the cursor.
     const bool enhancedMovement = Engine::Characters::EnhancedMovementEnabled();
     const bool headTaken = Engine::Characters::UpdateHeroLook(c, bLookAtMouse);
-    if (!headTaken && bLookAtMouse)
+    const bool worldPointerAvailable = WorldPointerAvailable();
+    const bool worldClick = worldPointerAvailable && !s_bIgnoreHeldClickAfterNpcTalk &&
+                            (MouseLButtonPush || MouseLButton);
+    if (!headTaken && bLookAtMouse && worldClick)
     {
         int mousePosY = MouseY;
 
@@ -3142,7 +3114,6 @@ void MoveHero()
     {
         // Walking ends a turn toward the cursor: the walk's own turn takes over.
         s_turningToCursor = false;
-        s_cursorAwaySeconds = 0.f;
         if (g_isCharacterBuff(o, eDeBuff_Harden) || g_isCharacterBuff(o, eDeBuff_CursedTempleRestraint))
         {
             SetPlayerStop(c);
@@ -3177,13 +3148,12 @@ void MoveHero()
     {
         if (enhancedMovement)
         {
-            TurnToCursor(c, HeroX, HeroY, bLookAtMouse);
+            TurnToCursor(c, HeroX, HeroY, bLookAtMouse, worldClick);
         }
         else
         {
             s_turningToCursor = false;
-            s_cursorAwaySeconds = 0.f;
-            SnapToCursor(c, HeroX, HeroY, bLookAtMouse);
+            SnapToCursor(c, HeroX, HeroY, bLookAtMouse && worldClick);
         }
 
         GameLogic::Combat::UseSkillRagePosition(c);
@@ -3204,7 +3174,7 @@ void MoveHero()
     // click landing on one -- COptionWindow being the concrete case that surfaced this -- fell
     // through and moved the character instead of being consumed by the window. IsMouseOverUI()
     // queries RmlUi's own hover chain directly, sidestepping that per-window bookkeeping.
-    if (!MouseOnWindow && false == g_pNewUISystem->CheckMouseUse() && !Core::Input::IsMouseOverUI())
+    if (worldPointerAvailable)
     {
         bool Success = false;
         if (MouseUpdateTime >= MouseUpdateTimeMax && !s_bIgnoreHeldClickAfterNpcTalk)

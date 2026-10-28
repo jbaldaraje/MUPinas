@@ -74,3 +74,11 @@ mu_add_test(
     LINK_LIBS
         MuClient
 )
+
+mu_add_test(
+    NAME test_hero_cursor_turn
+    SOURCES
+        test_hero_cursor_turn.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
+    LINK_LIBS MuClient
+)
