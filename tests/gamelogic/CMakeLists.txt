@@ -82,3 +82,9 @@ mu_add_test(
         $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS MuClient
 )
+
+mu_add_test(
+    NAME test_testing_session
+    SOURCES test_testing_session.cpp
+    LINK_LIBS MuClient
+)

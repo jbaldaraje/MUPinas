@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "GameLogic/Testing/TestingSession.h"
 #include "App/Control/ControlTaps.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "UI/Chat/Chat.h"
@@ -372,13 +373,17 @@ static int64_t SaturatingAddToUpper(const int64_t current, const int64_t add, in
     return current + add;
 }
 
-BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
+BOOL ConnectToConnectServer()
+{
+    CurrentProtocolState = REQUEST_JOIN_SERVER;
+    return CreateSocket(szServerIpAddress, g_ServerPort, false);
+}
+
+BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port, bool isEncrypted)
 {
     BOOL bResult = TRUE;
     g_ConsoleDebug->Write(MCD_NORMAL, L"[Connect to Server] ip address = %ls, port = %d", IpAddr, Port);
 
-    // todo: generally, it's a bad idea to assume a specific port number (range).
-    const bool isEncrypted = Port > 0xADFF || Port < 0xAD00;
     SocketClient = new Connection(MU_C16(IpAddr), Port, isEncrypted, &HandleIncomingPacket);
     if (!SocketClient->IsConnected())
     {
@@ -408,7 +413,7 @@ BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
         // probe it directly. Only cache game-server endpoints: a reconnect
         // re-runs the login/character/join sequence, which the connect server
         // can't answer. The connect server is the only unencrypted endpoint
-        // (see the port heuristic above), so caching when isEncrypted captures
+        // selected by the caller), so caching when isEncrypted captures
         // both the redirected game server (ReceiveServerConnect), a map-server
         // change, and a direct game-server connection (where ReceiveServerConnect
         // never runs), while skipping the connect server that would otherwise
@@ -1086,17 +1091,38 @@ void LogSafeCastSizeMismatch(const char* packet_type, std::size_t received, std:
                           static_cast<unsigned>(expected));
 }
 
+static void ApplyCharacterInformationStats(const PRECEIVE_JOIN_MAP_SERVER_EXTENDED& data)
+{
+    CharacterAttribute->Experience = ntoh64(data.CurrentExperience);
+    CharacterAttribute->NextExperience = ntoh64(data.ExperienceForNextLevel);
+    CharacterAttribute->LevelUpPoint = data.LevelUpPoint;
+    CharacterAttribute->Strength = data.Strength;
+    CharacterAttribute->Dexterity = data.Dexterity;
+    CharacterAttribute->Vitality = data.Vitality;
+    CharacterAttribute->Energy = data.Energy;
+    CharacterAttribute->Charisma = data.Charisma;
+    CharacterAttribute->Life = data.Life;
+    CharacterAttribute->LifeMax = data.LifeMax;
+    CharacterAttribute->Mana = data.Mana;
+    CharacterAttribute->ManaMax = data.ManaMax;
+    CharacterAttribute->SkillMana = data.SkillMana;
+    CharacterAttribute->SkillManaMax = data.SkillManaMax;
+    CharacterAttribute->Shield = data.Shield;
+    CharacterAttribute->ShieldMax = data.ShieldMax;
+    CharacterAttribute->AddPoint = data.AddPoint;
+    CharacterAttribute->MaxAddPoint = data.MaxAddPoint;
+    CharacterAttribute->wMinusPoint = data.wMinusPoint;
+    CharacterAttribute->wMaxMinusPoint = data.wMaxMinusPoint;
+    CharacterAttribute->InventoryExtensions = data.InventoryExtensions;
+    CharacterAttribute->Resets = data.Resets;
+    CharacterAttribute->AttackSpeed = data.AttackSpeed;
+    CharacterAttribute->MagicSpeed = data.MagicSpeed;
+    CharacterAttribute->MaxAttackSpeed = data.MaxAttackSpeed;
+    CharacterMachine->Gold = data.Gold;
+}
+
 BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
 {
-    MouseLButton = false;
-    HeroIndex = rand() % MAX_CHARACTERS_CLIENT;
-    CHARACTER* c = &CharactersClient[HeroIndex];
-
-    CharacterAttribute->Ability = 0;
-    CharacterAttribute->AbilityTime[0] = 0;
-    CharacterAttribute->AbilityTime[1] = 0;
-    CharacterAttribute->AbilityTime[2] = 0;
-
     auto const Data = safe_cast<PRECEIVE_JOIN_MAP_SERVER_EXTENDED>(ReceiveBuffer, "PRECEIVE_JOIN_MAP_SERVER_EXTENDED");
     if (Data == nullptr)
     {
@@ -1104,32 +1130,26 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
         return false;
     }
 
-    CharacterAttribute->Experience = ntoh64(Data->CurrentExperience);
-    CharacterAttribute->NextExperience = ntoh64(Data->ExperienceForNextLevel);
-    CharacterAttribute->LevelUpPoint = Data->LevelUpPoint;
-    CharacterAttribute->Strength = Data->Strength;
-    CharacterAttribute->Dexterity = Data->Dexterity;
-    CharacterAttribute->Vitality = Data->Vitality;
-    CharacterAttribute->Energy = Data->Energy;
-    CharacterAttribute->Charisma = Data->Charisma;
-    CharacterAttribute->Life = Data->Life;
-    CharacterAttribute->LifeMax = Data->LifeMax;
-    CharacterAttribute->Mana = Data->Mana;
-    CharacterAttribute->ManaMax = Data->ManaMax;
-    CharacterAttribute->SkillMana = Data->SkillMana;
-    CharacterAttribute->SkillManaMax = Data->SkillManaMax;
-    CharacterAttribute->Shield = Data->Shield;
-    CharacterAttribute->ShieldMax = Data->ShieldMax;
-    CharacterAttribute->AddPoint = Data->AddPoint;
-    CharacterAttribute->MaxAddPoint = Data->MaxAddPoint;
-    CharacterAttribute->wMinusPoint = Data->wMinusPoint;
-    CharacterAttribute->wMaxMinusPoint = Data->wMaxMinusPoint;
-    CharacterAttribute->InventoryExtensions = Data->InventoryExtensions;
-    CharacterAttribute->Resets = Data->Resets;
-    CharacterAttribute->AttackSpeed = Data->AttackSpeed;
-    CharacterAttribute->MagicSpeed = Data->MagicSpeed;
-    CharacterAttribute->MaxAttackSpeed = Data->MaxAttackSpeed;
-    CharacterMachine->Gold = Data->Gold;
+    const bool refreshingInWorld = SceneFlag == MAIN_SCENE && CurrentProtocolState == RECEIVE_JOIN_MAP_SERVER
+        && Hero && Hero->Object.Live && gMapManager.WorldActive == Data->Map;
+    ApplyCharacterInformationStats(*Data);
+    if (refreshingInWorld)
+    {
+        // The same packet also refreshes stats after allocation or a live cap edit.
+        // Preserve world entities, equipment, input and open windows on that path.
+        Hero->PK = Data->PK;
+        Hero->CtlCode = Data->CtlCode;
+        gSkillManager.InvalidateSkillAttributeRequirementsCache();
+        return TRUE;
+    }
+
+    MouseLButton = false;
+    HeroIndex = rand() % MAX_CHARACTERS_CLIENT;
+    CHARACTER* c = &CharactersClient[HeroIndex];
+    CharacterAttribute->Ability = 0;
+    CharacterAttribute->AbilityTime[0] = 0;
+    CharacterAttribute->AbilityTime[1] = 0;
+    CharacterAttribute->AbilityTime[2] = 0;
 
     gMapManager.WorldActive = Data->Map;
     gMapManager.LoadWorld(gMapManager.WorldActive);
@@ -1973,6 +1993,8 @@ void ReceiveNotice(const BYTE* ReceiveBuffer)
     auto Data = (LPPRECEIVE_NOTICE)ReceiveBuffer;
     wchar_t Text[256]{};
     CMultiLanguage::ConvertFromUtf8(Text, Data->Notice);
+    if (Data->Result == 1 && GameLogic::Testing::ReceiveStatus(Text))
+        return;
 
     if (Data->Result == 0)
     {

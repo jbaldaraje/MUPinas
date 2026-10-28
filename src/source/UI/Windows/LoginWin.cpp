@@ -618,6 +618,5 @@ void CLoginWin::ProcessPendingConnectionReconnect()
 void CLoginWin::ConnectConnectionServer()
 {
     LogIn = 0;
-    CurrentProtocolState = REQUEST_JOIN_SERVER;
-    CreateSocket(szServerIpAddress, g_ServerPort);
+    ConnectToConnectServer();
 }

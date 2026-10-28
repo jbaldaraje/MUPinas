@@ -178,6 +178,14 @@ void CSystem::Release()
     SAFE_DELETE(m_pNewUIMng);
 }
 
+bool CSystem::CreateTestingHelperWindow()
+{
+    m_pTestingHelper = new CTestingHelperWindow;
+    if (m_pTestingHelper->Create(m_pNewUIMng)) return true;
+    SAFE_DELETE(m_pTestingHelper);
+    return false;
+}
+
 bool CSystem::CreateChatCommandWindow()
 {
     m_pNewChatCommandWindow = new CChatCommandWindow;
@@ -364,7 +372,7 @@ bool CSystem::LoadMainSceneInterface()
         return false;
     }
 
-    if (!CreateChatCommandWindow())
+    if (!CreateChatCommandWindow() || !CreateTestingHelperWindow())
     {
         return false;
     }
@@ -635,6 +643,7 @@ void CSystem::UnloadMainSceneInterface()
     }
 
     SAFE_DELETE(m_pNewHelpWindow);
+    SAFE_DELETE(m_pTestingHelper);
     SAFE_DELETE(m_pNewChatCommandWindow);
     SAFE_DELETE(m_pNewItemExplanationWindow);
     SAFE_DELETE(m_pNewSetItemExplanation);

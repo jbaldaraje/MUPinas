@@ -3586,7 +3586,9 @@ extern int  SoccerTime;
 extern wchar_t SoccerTeamName[2][8 + 1];
 extern bool SoccerObserver;
 
-BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port);
+// Game endpoints encrypt traffic; the connect-server entry point below is plaintext.
+BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port, bool isEncrypted = true);
+BOOL ConnectToConnectServer();
 void DeleteSocket();
 
 // Tears the live game session down to a clean login-scene state (matching the

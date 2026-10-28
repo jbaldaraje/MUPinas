@@ -1,0 +1,23 @@
+/* Shared responsive layout; each theme supplies the existing window shell and component skins. */
+#panel { pointer-events: auto; width: 560dp; height: 520dp; max-width: 94%; max-height: 92%; font-size: 12dp; color: token(text-primary); font-family: "token(font-body)"; }
+#content.window-shell-content { align-items: stretch; justify-content: flex-start; padding-left: 8dp; padding-right: 8dp; }
+.testing-tabs { display: flex; flex-wrap: wrap; flex-shrink: 0; margin-bottom: 5dp; }
+.btn.testing-tab { position: relative; box-sizing: border-box; width: 15.5%; min-width: 0; white-space: nowrap; height: 28dp; line-height: 28dp; margin: 2dp; padding: 0 2dp; font-size: 9dp; }
+.testing-tab.selected { color: #ffdc8c; border-color: #b9985a; }
+.testing-feedback { flex-shrink: 0; padding: 7dp; color: #dacaab; background-color: #161919; margin-bottom: 5dp; }
+.testing-feedback.pending { color: #edc268; }
+.testing-scroll { display: flex; flex-direction: column; align-items: stretch; flex: 1; width: 100%; box-sizing: border-box; min-height: 0; overflow: hidden auto; pointer-events: auto; padding: 3dp 8dp 3dp 3dp; }
+.testing-page { display: none; flex-shrink: 0; width: 100%; }
+/* A definite logical width avoids percentage intrinsic sizing under RmlUi scroll containers.
+   The viewport cap follows the shell's 94% limit and reserves its chrome/padding. */
+.testing-page.active { display: block; width: 500dp; max-width: calc(94vw - 60dp); }
+p { display: block; white-space: normal; line-height: 18dp; margin: 4dp 0 9dp 0; }
+.testing-fields { display: flex; flex-wrap: wrap; justify-content: space-between; }
+.testing-field { display: block; width: 47%; margin: 0 1% 9dp 0; line-height: 20dp; }
+.testing-field .text-field { display: block; position: relative; width: 100%; height: 26dp; font-size: 12dp; padding: 2dp 5dp; box-sizing: border-box; pointer-events: auto; }
+.testing-actions { display: flex; flex-direction: row; flex-wrap: wrap; justify-content: flex-start; flex-shrink: 0; }
+.btn.testing-button { display: block; position: relative; width: auto; min-width: 102dp; height: 30dp; line-height: 30dp; margin: 3dp 6dp 4dp 0; padding: 0 10dp; font-size: 11dp; }
+.testing-footer { padding-top: 5dp; justify-content: flex-end; }
+.testing-note, .testing-muted { color: #a9a39a; white-space: normal; line-height: 18dp; }
+.testing-summary { display: block; width: 100%; box-sizing: border-box; color: #e2cb92; background-color: #141717; padding: 6dp; white-space: normal; }
+.testing-record { display: block; padding: 3dp; border-bottom: 1dp #3a3935; font-size: 11dp; }
